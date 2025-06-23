@@ -14,6 +14,9 @@ dependencies = [
 test = [
     "pytest>=7.0",
 ]
+dev = [
+    "ruff",
+]
 
 [project.urls]
 Homepage = "https://github.com/NumerousAI/pytest-llm-validate" # Placeholder

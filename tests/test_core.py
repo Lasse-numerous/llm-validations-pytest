@@ -1,6 +1,7 @@
 import pytest
 from numerous.pytest_llm_validate.core import load_rules
 
+
 def test_loader_missing_raises():
     """
     Tests that the placeholder load_rules function raises NotImplementedError.

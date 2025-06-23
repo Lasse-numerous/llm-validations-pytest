@@ -1,29 +1,24 @@
-# Pre-commit hooks will be defined here.
-# This file is a placeholder and will be populated with specific hooks
-# such as ruff, mypy, etc., in later phases as the toolchain is built out.
-
-# Example structure (to be uncommented and configured later):
-# repos:
-# -   repo: https://github.com/pre-commit/pre-commit-hooks
-#     rev: v4.5.0
-#     hooks:
-#     -   id: trailing-whitespace
-#     -   id: end-of-file-fixer
-#     -   id: check-yaml
-#     -   id: check-added-large-files
-# -   repo: https://github.com/astral-sh/ruff-pre-commit
-#     rev: v0.1.7 # Replace with actual ruff version
-#     hooks:
-#     -   id: ruff
-#         args: [--fix, --exit-non-zero-on-fix]
-#     -   id: ruff-format
-#         args: []
-# -   repo: https://github.com/pre-commit/mirrors-mypy
-#     rev: '' # Replace with actual mypy version
-#     hooks:
-#     -   id: mypy
-#         additional_dependencies: [] # Add mypy dependencies here
-#         args: [--strict]
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0 # Using a recent version
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+    -   id: check-toml
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version should be managed in pyproject.toml or match it
+    # For simplicity here, using a recent rev.
+    # Ideally, sync this with the version in pyproject.toml's [project.optional-dependencies.dev]
+    rev: v0.4.4 # Using a recent version of ruff pre-commit hook
+    hooks:
+    -   id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+    -   id: ruff-format
+        args: [] # Use default ruff format configuration
 
 ci:
     autofix_commit_msg: |
