@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/**"
+      - "fix/**"
+      - "docs/**"
+      - "test/**"
+      - "chore/**" # Added chore as per PRD branch naming
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[test] # Assuming a test extra will be defined in pyproject.toml
+        # pip install ruff mypy pytest pytest-cov mkdocs # Placeholder for actual tools
+
+    - name: Lint with Ruff
+      run: |
+        # Placeholder: ruff check .
+        # Placeholder: ruff format --check .
+        echo "Linting step placeholder"
+
+    - name: Type check with MyPy
+      run: |
+        # Placeholder: mypy numerous --strict
+        echo "Type checking step placeholder"
+
+    - name: Test with Pytest
+      run: |
+        # Placeholder: pytest --cov=numerous --cov-report=xml
+        echo "Testing step placeholder"
+
+    - name: Build documentation with MkDocs
+      run: |
+        # Placeholder: mkdocs build
+        echo "Docs build step placeholder"

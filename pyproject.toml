@@ -1,0 +1,37 @@
+[project]
+name = "pytest-LLM-Validate"
+version = "0.1.0-rc1"
+description = "A pytest plugin for AI-driven qualitative & behavioural tests."
+authors = [
+    {name = "Numerous AI", email = "support@numerous.ai"},
+]
+license = {text = "MIT"}
+requires-python = ">=3.12, <3.14"
+dependencies = [
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/NumerousAI/pytest-llm-validate" # Placeholder
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."] # Search in the current directory
+include = ["numerous*"]  # Include the 'numerous' namespace package and its sub-packages
+namespaces = true # Enable namespace package support
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
