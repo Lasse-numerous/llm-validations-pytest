@@ -26,7 +26,7 @@ class TestLLMEvalFixture:
         assert hasattr(tester, "get_results")
         assert hasattr(tester, "get_summary")
 
-    @pytest.fixture(autouse=True)  # type: ignore[misc]
+    @pytest.fixture(autouse=True)
     def mock_get_agent(self, mocker: Any) -> Any:
         """Mock the get_agent function to avoid actual LLM calls."""
         from numerous.pytest_llm_validate.models import (
