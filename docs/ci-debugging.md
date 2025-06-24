@@ -485,5 +485,24 @@ This CI debugging toolkit provides:
 ✅ **Detailed logging** for debugging
 ✅ **Actionable suggestions** for common issues
 ✅ **Integration** with development workflow
+✅ **Conventional commit validation** - Format checking integrated into CI simulation
+
+## Commit Message Validation
+
+The CI simulation now includes commit message validation:
+
+```bash
+# Test commit message validation
+./scripts/precommit-ci.sh commit-check
+
+# Integrated into all CI simulation modes
+./scripts/precommit-ci.sh all  # Includes commit validation
+```
+
+**Features:**
+- Validates conventional commit format: `type(scope): description`
+- Checks against allowed types and required scopes
+- Provides clear error messages with examples
+- Integrated into pre-push validation pipeline
 
 Use these tools to catch issues early, debug failures quickly, and maintain a healthy CI pipeline!

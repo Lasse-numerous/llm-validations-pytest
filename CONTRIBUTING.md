@@ -18,22 +18,50 @@ We use a **feature-branch** workflow with **squash-on-merge**:
 
 ### Commit Message Convention
 
-Follow conventional commits with the format: `type(scope): concise summary`
+**⚠️ REQUIRED**: All commits must follow conventional commit format with proper scope validation.
 
-**Types:**
-- `feat`: New features
-- `fix`: Bug fixes
-- `docs`: Documentation changes
-- `test`: Adding or modifying tests
-- `chore`: Maintenance tasks
-- `ci`: CI/CD changes
-- `refactor`: Code refactoring
+**Format: `type(scope): description`**
+
+**Valid Types:**
+- `feat` - New features
+- `fix` - Bug fixes
+- `docs` - Documentation changes
+- `style` - Code style changes
+- `refactor` - Code refactoring
+- `perf` - Performance improvements
+- `test` - Testing changes
+- `build` - Build system changes
+- `ci` - CI/CD changes
+- `chore` - Maintenance tasks
+- `revert` - Revert previous changes
+
+**Valid Scopes (Content Areas) - REQUIRED:**
+- `core` - Core functionality
+- `test` - Testing infrastructure
+- `docs` - Documentation
+- `ci` - CI/CD pipeline
+- `build` - Build system
+- `config` - Configuration
+- `scripts` - Utility scripts
+- `api` - API changes
+- `cli` - Command line interface
+- `web` - Web interface
+- `data` - Data handling
+- `security` - Security features
+- `deps` - Dependencies
 
 **Examples:**
-- `feat(loader): add prompt loader`
-- `test(decorator): verify simple case`
-- `docs(contrib): outline workflow`
-- `ci: add GitHub Actions workflows`
+- `feat(core): add new authentication system`
+- `fix(test): resolve failing unit tests`
+- `docs(api): update endpoint documentation`
+- `chore(deps): update dependencies`
+- `ci(build): optimize GitHub Actions workflow`
+- `refactor(scripts): improve CI debugging tools`
+
+**Validation:**
+- ✅ **Pre-commit validation**: Every commit is automatically validated
+- ✅ **CI validation**: Commit format checked in pre-push hooks
+- ❌ **Invalid commits rejected**: Non-conforming commits are blocked
 
 ### Development Setup
 
@@ -46,9 +74,10 @@ Follow conventional commits with the format: `type(scope): concise summary`
    pip install -e ".[dev]"
    ```
 
-2. **Install pre-commit hooks (includes pytest):**
+2. **Install pre-commit hooks (includes pytest & conventional commits):**
    ```bash
    pre-commit install
+   pre-commit install --hook-type commit-msg  # For conventional commit validation
    ```
 
 3. **Verify setup with pre-commit (runs all checks + tests):**
@@ -96,12 +125,15 @@ Follow conventional commits with the format: `type(scope): concise summary`
 
 Our pre-commit configuration provides comprehensive quality checking before every commit:
 
-**Automated Checks (13 hooks):**
+**Automated Checks (11 regular + 1 commit-msg hook):**
 1. **Code Quality**: trailing whitespace, end-of-file, YAML/JSON/TOML validation
 2. **Security**: debug statements check, bandit security scan
-3. **Style**: ruff linting & formatting (ruff 0.12.0)
-4. **Type Safety**: mypy type checking (mypy 1.16.1)
-5. **Tests**: pytest execution with fast feedback (~0.05s)
+3. **Tests**: pytest execution with fast feedback (~0.05s)
+4. **Documentation**: MkDocs build validation
+5. **Commit Messages**: conventional commit format validation (commit-msg hook)
+
+**Pre-push Validation:**
+6. **Comprehensive CI simulation**: complete linting, type checking, testing, and commit validation
 
 **Configuration highlights:**
 - All tool versions aligned with CI pipeline

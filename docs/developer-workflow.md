@@ -29,8 +29,9 @@ source .venv/bin/activate  # Linux/Mac
 # 3. Install in development mode
 pip install -e ".[dev]"
 
-# 4. Install pre-commit hooks
+# 4. Install pre-commit hooks (including commit message validation)
 pre-commit install
+pre-commit install --hook-type commit-msg
 
 # 5. Verify setup
 pre-commit run --all-files
@@ -66,34 +67,34 @@ pytest tests/test_your_feature.py -v
 pytest
 ```
 
-**Commit frequently:**
+**Commit frequently with conventional format:**
 ```bash
 git add .
-git commit -m "feat(scope): add feature description"
+git commit -m "feat(core): add feature description"
 # Pre-commit hooks run automatically and must pass
+# Conventional commit format is validated and enforced
 ```
 
 ### 2. Quality Assurance
 
-Our pre-commit pipeline runs **13 hooks** automatically on every commit:
+Our pre-commit pipeline runs **11 regular hooks** + **1 commit-msg hook** automatically:
 
-**Code Quality Checks:**
-- Trailing whitespace removal
-- End-of-file fixing
-- YAML/JSON/TOML validation
-- Large file detection
-- Merge conflict detection
-- Debug statement detection
+**Regular Hooks (every commit):**
+- **Code Quality**: Trailing whitespace, end-of-file, YAML/JSON/TOML validation
+- **Security**: Debug statement detection, bandit security scanning
+- **Testing**: Pytest execution (~0.05s) with automatic cleanup
+- **Documentation**: MkDocs build validation
 
-**Code Style & Standards:**
-- **Ruff** (0.12.0): Linting and formatting
-- **MyPy** (1.16.1): Type checking in strict mode
-- **Bandit** (1.8.5): Security vulnerability scanning
+**Commit Message Hook:**
+- **Conventional Commits**: Format validation with required scopes
 
-**Testing:**
-- **Pytest**: Quick test execution (~0.05s)
-- No coverage calculation (for speed)
-- Automatic cleanup of cache files
+**Pre-push Hooks:**
+- **CI Simulation**: Comprehensive linting, type checking, testing, and commit validation
+
+**Configuration highlights:**
+- No duplicate tool execution (CI simulation handles ruff/mypy for pre-push)
+- Pytest runs without coverage for speed in regular commits
+- Conventional commit validation prevents invalid commit messages
 
 ### 3. Manual Quality Checks
 
@@ -142,6 +143,57 @@ mkdocs build --strict
 git fetch origin
 git rebase origin/main  # if needed
 ```
+
+## Commit Message Standards
+
+### Conventional Commits (Required)
+
+**All commits must follow conventional commit format with mandatory scopes.**
+
+**Format: `type(scope): description`**
+
+**Valid Types:**
+- `feat` - New features
+- `fix` - Bug fixes
+- `docs` - Documentation changes
+- `style` - Code style changes
+- `refactor` - Code refactoring
+- `perf` - Performance improvements
+- `test` - Testing changes
+- `build` - Build system changes
+- `ci` - CI/CD changes
+- `chore` - Maintenance tasks
+- `revert` - Revert previous changes
+
+**Valid Scopes (Required):**
+- `core` - Core functionality
+- `test` - Testing infrastructure
+- `docs` - Documentation
+- `ci` - CI/CD pipeline
+- `build` - Build system
+- `config` - Configuration
+- `scripts` - Utility scripts
+- `api` - API changes
+- `cli` - Command line interface
+- `web` - Web interface
+- `data` - Data handling
+- `security` - Security features
+- `deps` - Dependencies
+
+**Examples:**
+```bash
+feat(core): add new authentication system
+fix(test): resolve failing unit tests
+docs(api): update endpoint documentation
+chore(deps): update project dependencies
+ci(build): optimize GitHub Actions workflow
+refactor(scripts): improve debugging tools
+```
+
+**Validation:**
+- ✅ **Commit-msg hook**: Validates format on every commit
+- ✅ **Pre-push CI**: Double-checks format before remote push
+- ❌ **Enforcement**: Invalid commits are automatically rejected
 
 ## Code Standards
 
