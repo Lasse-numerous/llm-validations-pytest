@@ -1,0 +1,22 @@
+site_name: pytest-LLM-Validate
+site_description: pytest plugin for AI-driven qualitative testing using Large Language Models
+site_url: https://github.com/user/pytest-llm-validate
+
+nav:
+  - Home: index.md
+  - Resume: resume.md
+
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: cyan
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+
+docs_dir: docs
+site_dir: site
