@@ -1,6 +1,7 @@
 #!/bin/bash
-# Lightweight CI Simulation for Pre-commit Hooks
+# Comprehensive CI Simulation for Pre-push Validation
 # Runs essential CI checks without dependency installation
+# Acts as the main linting/type-checking step in pre-commit pipeline
 
 set -e  # Exit on any error
 
@@ -33,7 +34,7 @@ run_lint_checks() {
         local ruff_files=$(ruff check --show-files . 2>/dev/null | wc -l || echo "unknown")
         echo "  → Checking ${ruff_files} files with ruff"
 
-        if ruff check . 2>&1; then
+        if ruff check . --fix 2>&1; then
             log_success "✓ Ruff check passed"
         else
             log_error "✗ Ruff check failed"
