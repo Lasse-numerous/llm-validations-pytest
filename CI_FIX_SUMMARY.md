@@ -266,23 +266,36 @@ The whole point of CI simulation is to catch issues before they reach CI. Runnin
 - ✅ **Result parity**: 56.95% coverage reported identically in both environments
 - ✅ **Issue detection**: Local simulation now catches same problems as CI
 
-### Ultimate Solution: Real CI Trigger
-After user feedback about synchronization complexity, added `real-ci` command:
+### Key Insight: GitHub CLI Limitation
+User identified critical flaw: **GitHub CLI can only trigger workflows on pushed code, not local changes!**
+
+> *"The gh cli can only run pushed code, right - nothing locally - correct? In this case we should have a sync mirror in regular precommit yaml and then consider the gh cli as a post push debugging tool"*
+
+### Redesigned Architecture
+
+**BEFORE** (flawed):
+- Removed local CI simulation
+- Only had `real-ci` command
+- ❌ `real-ci` before push would test OLD pushed code, not local changes!
+
+**AFTER** (correct):
+
+#### 1. PRE-PUSH: Local CI Mirror
 ```bash
-./scripts/precommit-ci.sh real-ci
+./scripts/precommit-ci.sh all  # Mirrors GitHub Actions on LOCAL changes
+git push
 ```
 
-**How it works**:
-- Uses GitHub CLI to trigger the ACTUAL `.github/workflows/ci.yml`
-- No simulation needed - runs the real thing with fresh dependencies
-- **Fails explicitly** if GitHub CLI unavailable/unauthenticated (no misleading fallbacks)
-- Completely eliminates synchronization problem
+#### 2. POST-PUSH: GitHub CLI Debugging
+```bash
+gh run watch                   # Debug the CI triggered by push
+gh run view --log             # Inspect failure details
+./scripts/precommit-ci.sh debug-ci  # Show debugging commands
+```
 
-**Benefits**:
-- ✅ **Zero sync issues**: Uses actual CI workflow file
-- ✅ **Definitive results**: Same environment as merge/PR checks
-- ✅ **Fresh dependencies**: No local environment differences
-- ✅ **Ultimate confidence**: If this passes, CI will pass
+**Clear separation of concerns**:
+- **Local validation**: Catch issues before push using CI mirror
+- **Remote debugging**: Inspect actual CI failures using GitHub CLI
 
 ---
 
@@ -373,3 +386,5 @@ This ensures that issues are caught locally before they reach CI, saving develop
 7. **Command Line Override**: CLI arguments override config file settings, which can cause local/CI discrepancies
 8. **True CI Simulation**: Local CI simulation must run IDENTICAL commands to actual CI - different commands defeat the purpose
 9. **User Feedback Value**: Sharp questions like "why different CI locally vs online?" expose fundamental architectural flaws
+10. **GitHub CLI Scope Limitation**: `gh workflow run` only works on pushed code, not local changes - crucial for tool design
+11. **Workflow Architecture**: Separate pre-push validation (local) from post-push debugging (remote) - different tools for different stages

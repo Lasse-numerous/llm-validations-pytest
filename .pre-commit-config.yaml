@@ -25,16 +25,38 @@ repos:
         args: ["-c", "pyproject.toml"]
         additional_dependencies: ["bandit[toml]"]
 
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.12.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.16.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests, pydantic, pytest]
+
   - repo: local
     hooks:
-      - id: pytest
-        name: pytest
-        entry: sh
+      - id: pytest-quick
+        name: pytest (quick - no coverage)
+        entry: pytest
         language: system
+        args: [--tb=short, -q, --no-cov, --override-ini=addopts=, tests/]
         types: [python]
-        args: [-c, "pytest --tb=short -q --no-cov --override-ini='addopts=' tests/; rm -f .pytest-llm-validate-history.json .coverage"]
         pass_filenames: false
-        always_run: true
+        stages: [pre-commit]
+
+      - id: pytest-full
+        name: pytest (full CI mirror with coverage)
+        entry: pytest
+        language: system
+        args: [--cov=numerous.pytest_llm_validate, --cov-report=xml, --cov-report=term-missing]
+        types: [python]
+        pass_filenames: false
+        stages: [pre-push]
 
       - id: mkdocs-build
         name: mkdocs-build
@@ -43,12 +65,3 @@ repos:
         args: [build, --strict]
         files: ^(docs/.*|mkdocs\.yml)$
         pass_filenames: false
-
-      - id: ci-simulation
-        name: ci-simulation (full test suite with coverage)
-        entry: ./scripts/precommit-ci.sh
-        language: system
-        args: [all]
-        stages: [pre-push]
-        pass_filenames: false
-        verbose: true

@@ -8,7 +8,7 @@ import pytest
 from .fixture import create_llm_eval_tester
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore[misc]
 def llm_eval() -> Callable[..., Any]:
     """Pytest fixture for LLM-based evaluation.
 
