@@ -97,6 +97,92 @@ run_quick_tests() {
     fi
 }
 
+validate_commit_messages() {
+    log_info "Validating recent commit messages..."
+
+    # Define allowed types and scopes
+    local allowed_types="feat fix docs style refactor perf test build ci chore revert"
+    local allowed_scopes="core test docs ci build feat fix perf style refactor chore config scripts api cli web data security deps"
+
+    # Check last 5 commits (or fewer if not available)
+    local commit_count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
+    local check_count=$((commit_count < 5 ? commit_count : 5))
+
+    if [ "$check_count" -eq 0 ]; then
+        log_warning "No commits found to validate"
+        return 0
+    fi
+
+    echo "  → Checking last ${check_count} commit message(s)"
+
+    local invalid_commits=0
+    for i in $(seq 0 $((check_count - 1))); do
+        local commit_msg=$(git log --format=%s -n 1 HEAD~$i 2>/dev/null)
+        local commit_hash=$(git log --format=%h -n 1 HEAD~$i 2>/dev/null)
+
+        # Check if message matches conventional commit pattern: type(scope): description
+        if echo "$commit_msg" | grep -qE '^[a-z]+\([^)]+\): .+'; then
+            # Extract type (everything before the first parenthesis)
+            local type="${commit_msg%%(*}"
+            # Extract scope (everything between parentheses)
+            local temp="${commit_msg#*(}"
+            local scope="${temp%%)*}"
+
+            # Check if type is allowed
+            local type_valid=false
+            for allowed_type in $allowed_types; do
+                if [[ "$type" == "$allowed_type" ]]; then
+                    type_valid=true
+                    break
+                fi
+            done
+
+            # Check if scope is allowed
+            local scope_valid=false
+            for allowed_scope in $allowed_scopes; do
+                if [[ "$scope" == "$allowed_scope" ]]; then
+                    scope_valid=true
+                    break
+                fi
+            done
+
+            if [[ "$type_valid" == true && "$scope_valid" == true ]]; then
+                echo "    ✓ ${commit_hash}: ${type}(${scope}) - Valid"
+            elif [[ "$type_valid" == false ]]; then
+                echo "    ✗ ${commit_hash}: Invalid type '${type}'"
+                echo "      Allowed types: ${allowed_types}"
+                invalid_commits=$((invalid_commits + 1))
+            else
+                echo "    ✗ ${commit_hash}: Invalid scope '${scope}'"
+                echo "      Allowed scopes: ${allowed_scopes}"
+                invalid_commits=$((invalid_commits + 1))
+            fi
+        else
+            echo "    ✗ ${commit_hash}: Invalid format"
+            echo "      Expected: type(scope): description"
+            echo "      Got: ${commit_msg}"
+            invalid_commits=$((invalid_commits + 1))
+        fi
+    done
+
+    if [ "$invalid_commits" -eq 0 ]; then
+        log_success "✓ All commit messages follow conventional format"
+    else
+        log_error "✗ ${invalid_commits} commit message(s) don't follow conventional format"
+        echo ""
+        echo "  Required format: type(scope): description"
+        echo "  Valid types: ${allowed_types}"
+        echo "  Valid scopes: ${allowed_scopes}"
+        echo ""
+        echo "  Examples:"
+        echo "    feat(core): add new authentication system"
+        echo "    fix(test): resolve failing unit tests"
+        echo "    docs(api): update endpoint documentation"
+        echo "    chore(deps): update dependencies"
+        return 1
+    fi
+}
+
 print_validation_summary() {
     local mode=$1
     log_info "Validation Summary:"
@@ -142,21 +228,37 @@ main() {
     case "$mode" in
         "lint")
             run_lint_checks
+            echo ""
+            validate_commit_messages
             print_validation_summary "lint"
             ;;
         "test")
             run_quick_tests
+            echo ""
+            validate_commit_messages
             print_validation_summary "test"
             ;;
         "all")
             run_lint_checks
             echo ""
             run_quick_tests
+            echo ""
+            validate_commit_messages
             print_validation_summary "comprehensive"
+            ;;
+        "commit-check")
+            validate_commit_messages
+            print_validation_summary "commit-validation"
             ;;
         *)
             log_error "Unknown command: $1"
-            echo "Usage: $0 {lint|test|all}"
+            echo "Usage: $0 {lint|test|all|commit-check}"
+            echo ""
+            echo "Commands:"
+            echo "  lint        - Run linting checks + commit validation"
+            echo "  test        - Run tests + commit validation"
+            echo "  all         - Run comprehensive checks + commit validation"
+            echo "  commit-check - Run only commit message validation"
             exit 1
             ;;
     esac
