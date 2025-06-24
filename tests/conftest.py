@@ -2,18 +2,5 @@
 
 import pytest
 
-
-@pytest.fixture
-def llm_eval():
-    """Placeholder llm_eval fixture that raises NotImplementedError.
-    
-    This is a placeholder fixture to make tests work during Phase 1.
-    The actual implementation will be added in Phase 2.
-    
-    Raises:
-        NotImplementedError: Always, until Phase 2 implementation
-    """
-    def _llm_eval(spec: str, **kwargs) -> None:  # type: ignore[misc]
-        raise NotImplementedError("llm_eval fixture will be implemented in Phase 2")
-    
-    return _llm_eval
+# Import and register the plugin manually for testing
+pytest_plugins = ["numerous.pytest_llm_validate.plugin"]

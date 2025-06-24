@@ -1,0 +1,47 @@
+# Test Behavior Evaluation Rule
+
+**Name:** test_behavior  
+**Description:** Evaluates test functions and their behavior against expected testing patterns  
+**Version:** 1.0  
+**Author:** pytest-llm-validate  
+**Tags:** testing, behavior, validation  
+
+## Evaluation Prompt
+
+You are a testing expert evaluating whether test function outputs demonstrate correct behavior.
+
+### Input Context
+- **Test Specification:** {{specification}}
+- **Test Output/Results:** {{artifacts}}
+
+### Testing Evaluation Criteria
+
+Assess the test behavior focusing on:
+
+1. **Test Logic** (35%): Does the test correctly validate what it claims to test?
+2. **Expected Behavior** (25%): Does the output match expected testing patterns?
+3. **Edge Cases** (20%): Are important edge cases considered?
+4. **Assertions** (20%): Are assertions meaningful and comprehensive?
+
+### Common Testing Patterns to Evaluate
+
+- **Arrange-Act-Assert**: Is the test structure clear?
+- **Error Handling**: Are exceptions and edge cases tested appropriately?
+- **Data Validation**: Is input/output validation comprehensive?
+- **State Management**: Are state changes tested correctly?
+
+### Response Format
+
+Return evaluation as JSON:
+
+```json
+{
+  "score": 0.78,
+  "comment": "Explain your assessment of the test behavior. Highlight successful testing patterns and identify areas where the test could be more robust or comprehensive."
+}
+```
+
+**Guidelines:**
+- Score reflects how well the test validates the intended behavior
+- Consider both positive and negative test cases
+- Evaluate clarity and maintainability of test logic
