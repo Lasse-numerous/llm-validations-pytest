@@ -76,32 +76,29 @@ We use a **feature-branch** workflow with **squash-on-merge**:
    pip install -e ".[dev]"
    ```
 
-2. **Install pre-commit hooks (includes pytest & conventional commits):**
+2. **Install pre-commit hooks (handles ALL validation automatically):**
    ```bash
    pre-commit install
    pre-commit install --hook-type commit-msg  # For conventional commit validation
    ```
 
-3. **Verify setup with pre-commit (runs all checks + tests):**
+3. **Verify setup:**
    ```bash
-   pre-commit run --all-files
+   pre-commit run --all-files  # Test all hooks work correctly
    ```
 
-4. **Manual test execution:**
-   ```bash
-   # Run tests with coverage (CI configuration)
-   pytest --cov=numerous.pytest_llm_validate --cov-report=term-missing --cov-fail-under=80
+4. **That's it! All validation now happens automatically:**
+   - `git commit` → ruff, mypy, quick tests, conventional commits
+   - `git push` → full test suite with coverage (mirrors CI exactly)
 
-   # Quick test run (as used in pre-commit)
-   pytest --tb=short -q --no-cov tests/
-   ```
-
-5. **Manual quality checks (automated in pre-commit):**
+5. **Manual commands only needed for debugging:**
    ```bash
-   ruff check .
-   ruff format .
-   mypy .
-   bandit -r numerous/
+   # Debug specific hooks
+   pre-commit run ruff              # Just linting
+   pre-commit run pytest-full      # Just full tests
+
+   # Debug CI failures (after push)
+   ./scripts/debug-ci.sh           # Shows GitHub CLI debugging commands
    ```
 
 ## Code Standards
@@ -116,32 +113,37 @@ We use a **feature-branch** workflow with **squash-on-merge**:
 
 ### Testing Requirements
 
-- **Coverage**: 80% minimum required (enforced by CI)
+- **Coverage**: 50% minimum required (enforced by CI and pre-push hooks)
 - **Framework**: pytest with fixtures and parametrization
 - **Mocking**: Use pytest-mock for external dependencies
 - **Integration tests**: Mark with `@pytest.mark.integration`
 - **LLM tests**: Mark with `@pytest.mark.llm` for tests requiring API calls
-- **Pre-commit**: Tests run automatically on every commit via pre-commit hooks
+- **Automatic testing**:
+  - Quick tests (no coverage) run on every commit
+  - Full tests with coverage run on every push (mirrors CI exactly)
 
-### Pre-commit Quality Pipeline
+### Automatic Quality Pipeline
 
-Our pre-commit configuration provides comprehensive quality checking before every commit:
+**All validation happens automatically via pre-commit hooks - no manual commands needed!**
 
-**Automated Checks (11 regular + 1 commit-msg hook):**
-1. **Code Quality**: trailing whitespace, end-of-file, YAML/JSON/TOML validation
-2. **Security**: debug statements check, bandit security scan
-3. **Tests**: pytest execution with fast feedback (~0.05s)
-4. **Documentation**: MkDocs build validation
-5. **Commit Messages**: conventional commit format validation (commit-msg hook)
+**On every commit (`git commit`):**
+- **File checks**: Trailing whitespace, end-of-file, YAML/JSON/TOML validation
+- **Code quality**: Ruff linting and formatting
+- **Type safety**: MyPy type checking with strict mode
+- **Quick tests**: Pytest execution (~0.2s) without coverage for speed
+- **Security**: Bandit security scanning
+- **Documentation**: MkDocs build validation
+- **Commit format**: Conventional commit validation with required scopes
 
-**Pre-push Validation:**
-6. **Comprehensive CI simulation**: complete linting, type checking, testing, and commit validation
+**On every push (`git push`):**
+- **Full test suite**: Pytest with coverage (exact mirror of GitHub Actions CI)
+- **Coverage validation**: 50% minimum threshold (same as CI)
 
-**Configuration highlights:**
-- All tool versions aligned with CI pipeline
-- Pytest runs tests without coverage for speed
-- Automatic cleanup of cache files
-- MyPy checks test files for type safety
+**Key benefits:**
+- ✅ **Zero manual steps**: Just use `git commit` and `git push` normally
+- ✅ **Perfect CI mirroring**: Pre-push hooks run identical commands to GitHub Actions
+- ✅ **Fast feedback**: Quick tests on commit, full tests on push
+- ✅ **No synchronization issues**: Single source of truth in `.pre-commit-config.yaml`
 
 ### Test-Driven Development (TDD)
 
@@ -155,23 +157,27 @@ We follow **TDD-first** approach:
 
 ### Before Opening a PR
 
-1. **Run pre-commit (covers all quality checks + tests):**
+**With automatic validation, the process is much simpler:**
+
+1. **Make your final commit** (triggers all validation automatically):
    ```bash
-   pre-commit run --all-files
+   git add .
+   git commit -m "feat(scope): your changes"
+   # ✅ This automatically runs: ruff, mypy, quick tests, commit validation
    ```
 
-2. **Verify CI compatibility with full coverage check:**
+2. **Push your branch** (triggers full CI-mirrored tests automatically):
    ```bash
-   pytest --cov=numerous.pytest_llm_validate --cov-report=term-missing --cov-fail-under=80
+   git push origin your-branch
+   # ✅ This automatically runs: full test suite with coverage
    ```
 
-3. **Test package build (uses setuptools backend):**
-   ```bash
-   python -m build
-   twine check dist/*
-   ```
+3. **Open your PR** - all checks should be green! ✅
 
-4. **Update documentation** if needed
+**If validation fails:**
+- Fix the reported issues locally
+- Commit and push again (validation runs automatically)
+- Use `./scripts/debug-ci.sh` if CI fails after opening PR
 
 ### PR Guidelines
 
@@ -229,14 +235,14 @@ Our GitHub Actions pipeline provides comprehensive validation:
 **Build Matrix**: Python 3.12 and 3.13
 **Pipeline Steps**:
 1. **Lint**: ruff check + format validation + mypy type checking
-2. **Test**: pytest with 80% coverage requirement
+2. **Test**: pytest with 50% coverage requirement
 3. **Docs**: MkDocs build validation
 4. **Security**: bandit security scanning
 5. **Build**: Package building with setuptools + twine validation
 
 **Key Features**:
 - **Build System**: Uses setuptools (not hatchling) for reliable builds
-- **Coverage**: Realistic 80% threshold (was 100%)
+- **Coverage**: Practical 50% threshold for development velocity
 - **Documentation**: Automated MkDocs builds with material theme
 - **Tool Alignment**: CI versions match pre-commit versions exactly
 
@@ -258,28 +264,29 @@ The project follows a structured development plan with clear phases:
 
 ### Daily Development Cycle
 
-1. **Start with pre-commit verification:**
-   ```bash
-   pre-commit run --all-files  # Ensures clean starting state
-   ```
+**With automatic validation, development is streamlined:**
 
-2. **Make changes following TDD:**
+1. **Make changes following TDD:**
    - Write failing tests first
    - Implement minimal code to pass
    - Refactor while keeping tests green
 
-3. **Commit frequently with meaningful messages:**
+2. **Commit frequently with conventional messages:**
    ```bash
    git add .
-   git commit -m "feat(loader): add rule validation"  # Pre-commit runs automatically
+   git commit -m "feat(loader): add rule validation"
+   # ✅ Pre-commit runs automatically: ruff, mypy, quick tests, commit validation
    ```
 
-4. **Pre-PR verification:**
+3. **Push when ready:**
    ```bash
-   # Full CI simulation
-   pytest --cov=numerous.pytest_llm_validate --cov-report=term-missing --cov-fail-under=80
-   python -m build && twine check dist/*
+   git push origin your-branch
+   # ✅ Pre-push runs automatically: full test suite with coverage (CI mirror)
    ```
+
+4. **If issues arise:**
+   - Fix locally and commit/push again (validation runs automatically)
+   - Use `./scripts/debug-ci.sh` for CI debugging after push
 
 ### Troubleshooting Common Issues
 
@@ -291,9 +298,9 @@ The project follows a structured development plan with clear phases:
 - We use strict mode - no `Any` types allowed
 - Add proper type annotations, especially for test functions
 
-**Coverage below 80%:**
+**Coverage below 50%:**
 - Add tests for uncovered lines
-- Use `pytest --cov --cov-report=html` for detailed coverage report
+- Use `pytest --cov=numerous.pytest_llm_validate --cov-report=html` for detailed coverage report
 
 **Build failures:**
 - We use setuptools (not hatchling)

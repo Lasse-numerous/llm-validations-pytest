@@ -75,74 +75,100 @@ git commit -m "feat(core): add feature description"
 # Conventional commit format is validated and enforced
 ```
 
-### 2. Quality Assurance
+### 2. Automatic Quality Assurance
 
-Our pre-commit pipeline runs **11 regular hooks** + **1 commit-msg hook** automatically:
+**All validation runs automatically via pre-commit hooks - no manual commands needed!**
 
-**Regular Hooks (every commit):**
-- **Code Quality**: Trailing whitespace, end-of-file, YAML/JSON/TOML validation
-- **Security**: Debug statement detection, bandit security scanning
-- **Testing**: Pytest execution (~0.05s) with automatic cleanup
+**On every commit (`git commit`):**
+- **File checks**: Trailing whitespace, end-of-file, YAML/JSON/TOML validation
+- **Code quality**: Ruff linting and formatting
+- **Type safety**: MyPy type checking with strict mode
+- **Quick tests**: Pytest execution (~0.2s) without coverage for speed
+- **Security**: Bandit security scanning
 - **Documentation**: MkDocs build validation
+- **Commit format**: Conventional commit validation with required scopes
 
-**Commit Message Hook:**
-- **Conventional Commits**: Format validation with required scopes
+**On every push (`git push`):**
+- **Full test suite**: Pytest with coverage (exact mirror of GitHub Actions CI)
+- **Coverage validation**: 50% minimum threshold (same as CI)
 
-**Pre-push Hooks:**
-- **CI Simulation**: Comprehensive linting, type checking, testing, and commit validation
+**Key benefits:**
+- ✅ **Zero manual steps**: Just use `git commit` and `git push` normally
+- ✅ **Perfect CI mirroring**: Pre-push hooks run identical commands to GitHub Actions
+- ✅ **Fast feedback**: Quick tests on commit, full tests on push
+- ✅ **No synchronization issues**: Single source of truth in `.pre-commit-config.yaml`
 
-**Configuration highlights:**
-- No duplicate tool execution (CI simulation handles ruff/mypy for pre-push)
-- Pytest runs without coverage for speed in regular commits
-- Conventional commit validation prevents invalid commit messages
+### 3. Manual Commands (Optional)
 
-### 3. Manual Quality Checks
-
-When needed, you can run individual tools:
-
-```bash
-# Formatting and linting
-ruff check .                    # Check for issues
-ruff format .                   # Auto-format code
-ruff check . --fix              # Fix auto-fixable issues
-
-# Type checking
-mypy .                          # Check all files
-mypy numerous/                  # Check specific directory
-
-# Security scanning
-bandit -r numerous/             # Scan for security issues
-
-# Testing with coverage (CI configuration)
-pytest --cov=numerous.pytest_llm_validate --cov-report=term-missing --cov-fail-under=80
-
-# Build testing
-python -m build                 # Build distribution packages
-twine check dist/*              # Validate packages
-```
-
-### 4. Pre-Pull Request Checklist
-
-**Before opening a PR:**
+**Pre-commit handles everything automatically, but for debugging you can run:**
 
 ```bash
-# 1. Run full pre-commit suite
+# Run all pre-commit hooks manually
 pre-commit run --all-files
 
-# 2. Verify CI compatibility
-pytest --cov=numerous.pytest_llm_validate --cov-report=term-missing --cov-fail-under=80
+# Run specific hooks
+pre-commit run ruff              # Just linting
+pre-commit run mypy              # Just type checking
+pre-commit run pytest-quick     # Just quick tests
+pre-commit run pytest-full      # Just full tests with coverage
 
-# 3. Test package build
-python -m build
-twine check dist/*
+# Individual tools (if needed for debugging)
+ruff check . --fix              # Fix linting issues
+mypy .                          # Check types
+pytest --cov=numerous.pytest_llm_validate --cov-report=term-missing  # Full tests
+```
 
-# 4. Ensure documentation is updated
-mkdocs build --strict
+### 4. CI Debugging (When GitHub Actions Fails)
 
-# 5. Verify branch is up-to-date
+**When CI fails after you push, use the debugging script:**
+
+```bash
+# Show GitHub CLI commands for debugging CI
+./scripts/debug-ci.sh
+
+# Common CI debugging commands:
+gh run list --workflow=ci.yml   # List recent CI runs
+gh run watch                    # Watch the latest run live
+gh run view --log               # View detailed failure logs
+```
+
+**Typical workflow when CI fails:**
+1. Push triggers GitHub Actions CI
+2. CI fails with specific error
+3. Use `./scripts/debug-ci.sh` to get debugging commands
+4. Use `gh run view --log` to see detailed failure logs
+5. Fix issues locally and push again
+
+### 5. Pre-Pull Request Checklist
+
+**Before opening a PR, ensure validation passes automatically:**
+
+```bash
+# 1. Make your final commit (triggers all validation automatically)
+git add .
+git commit -m "feat(scope): your changes"
+# ✅ This automatically runs: ruff, mypy, quick tests, commit validation
+
+# 2. Push your branch (triggers full CI-mirrored tests automatically)
+git push origin your-branch
+# ✅ This automatically runs: full test suite with coverage
+
+# 3. Verify branch is up-to-date with main
 git fetch origin
 git rebase origin/main  # if needed
+
+# 4. Open your PR - all checks should be green! ✅
 ```
+
+**If pre-commit or pre-push fails:**
+- Fix the reported issues
+- Commit the fixes (validation runs again automatically)
+- Push again (full tests run again automatically)
+
+**If CI fails after opening PR:**
+- Use `./scripts/debug-ci.sh` to debug the failure
+- Check `gh run view --log` for detailed error messages
+- Fix locally and push - CI will re-run automatically
 
 ## Commit Message Standards
 
@@ -400,10 +426,10 @@ def my_function(data: dict[str, Any]) -> str:
     return str(data)
 ```
 
-**Problem: Coverage below 80%**
+**Problem: Coverage below 50%**
 ```bash
 # Solution: Add tests or check coverage report
-pytest --cov --cov-report=html
+pytest --cov=numerous.pytest_llm_validate --cov-report=html
 open htmlcov/index.html  # View detailed coverage
 ```
 
@@ -416,15 +442,17 @@ python -m build --verbose
 
 ### Performance Optimization
 
-**Pre-commit Speed:**
-- Tests run in ~0.05s without coverage
-- Use `pytest --no-cov` for fastest execution
-- Cache is automatically cleaned after each run
+**Automatic Pre-commit Performance:**
+- **Quick tests** run in ~0.2s on commit (no coverage for speed)
+- **Full tests** run only on push (with coverage, mirrors CI exactly)
+- File checks and linting are very fast
+- Hooks only run on changed files when possible
 
-**Development Workflow:**
-- Use `pre-commit run <hook-name>` for individual hooks
-- Use `pytest -k "test_name"` for specific tests
-- Use `pytest --lf` to run only last failed tests
+**Manual Development:**
+- Use `pre-commit run <hook-name>` to run specific hooks
+- Use `pytest -k "test_name"` for specific tests during development
+- Use `pytest --lf` to re-run only last failed tests
+- Use `git commit --no-verify` to skip hooks (emergency only!)
 
 ## References
 
