@@ -141,18 +141,20 @@ run_actual_ci() {
         log_error "GitHub CLI (gh) not found!"
         echo "  → Install with: brew install gh (macOS) or apt install gh (Ubuntu)"
         echo "  → Or download from: https://cli.github.com/"
-        echo "  → Falling back to local simulation..."
-        run_full_tests
-        return $?
+        echo ""
+        log_error "Cannot run real CI without GitHub CLI"
+        echo "  → Use 'full-test' for local simulation instead"
+        return 1
     fi
 
     # Check if user is authenticated
     if ! gh auth status >/dev/null 2>&1; then
         log_error "Not authenticated with GitHub CLI!"
         echo "  → Run: gh auth login"
-        echo "  → Falling back to local simulation..."
-        run_full_tests
-        return $?
+        echo ""
+        log_error "Cannot run real CI without authentication"
+        echo "  → Use 'full-test' for local simulation instead"
+        return 1
     fi
 
     # Get current branch
@@ -184,11 +186,11 @@ run_actual_ci() {
         log_error "Failed to trigger CI workflow"
         echo "  → Make sure you have push access to the repository"
         echo "  → Check branch protection rules"
-        echo "  → GitHub CLI must be authenticated (gh auth login)"
+        echo "  → Verify the workflow file exists: .github/workflows/ci.yml"
         echo ""
-        log_warning "Falling back to local simulation..."
-        run_full_tests
-        return $?
+        log_error "Cannot run real CI - workflow trigger failed"
+        echo "  → Use 'full-test' for local simulation instead"
+        return 1
     fi
 }
 

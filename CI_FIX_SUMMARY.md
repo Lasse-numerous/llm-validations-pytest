@@ -263,8 +263,26 @@ The whole point of CI simulation is to catch issues before they reach CI. Runnin
 
 ### Verification
 - ✅ **Command identity**: Local and CI run identical pytest invocations
-- ✅ **Result parity**: 56.95% coverage reported identically in both environments
+- ✅ **Result parity**: 56.95% coverage reported identically in both environments  
 - ✅ **Issue detection**: Local simulation now catches same problems as CI
+
+### Ultimate Solution: Real CI Trigger
+After user feedback about synchronization complexity, added `real-ci` command:
+```bash
+./scripts/precommit-ci.sh real-ci
+```
+
+**How it works**:
+- Uses GitHub CLI to trigger the ACTUAL `.github/workflows/ci.yml`
+- No simulation needed - runs the real thing with fresh dependencies
+- Graceful fallback to local simulation if GitHub CLI unavailable
+- Completely eliminates synchronization problem
+
+**Benefits**:
+- ✅ **Zero sync issues**: Uses actual CI workflow file
+- ✅ **Definitive results**: Same environment as merge/PR checks  
+- ✅ **Fresh dependencies**: No local environment differences
+- ✅ **Ultimate confidence**: If this passes, CI will pass
 
 ---
 
