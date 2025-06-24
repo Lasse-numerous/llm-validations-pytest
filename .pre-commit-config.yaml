@@ -49,3 +49,21 @@ repos:
         args: [-c, "pytest --tb=short -q --no-cov --override-ini='addopts=' tests/; rm -f .pytest-llm-validate-history.json .coverage"]
         pass_filenames: false
         always_run: true
+
+      - id: mkdocs-build
+        name: mkdocs-build
+        entry: mkdocs
+        language: system
+        args: [build, --strict]
+        files: ^(docs/.*|mkdocs\.yml)$
+        stages: [pre-push]
+        pass_filenames: false
+
+      - id: ci-simulation
+        name: ci-simulation
+        entry: ./scripts/precommit-ci.sh
+        language: system
+        args: [lint]
+        stages: [pre-push]
+        pass_filenames: false
+        verbose: true
