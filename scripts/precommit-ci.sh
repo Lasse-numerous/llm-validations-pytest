@@ -1,7 +1,7 @@
 #!/bin/bash
-# Comprehensive CI Simulation for Pre-push Validation
-# Runs essential CI checks without dependency installation
-# Acts as the main linting/type-checking step in pre-commit pipeline
+# Pre-commit Development Tools
+# PRE-PUSH: Validate local changes with CI mirroring
+# POST-PUSH: Debug GitHub Actions CI with GitHub CLI tools
 
 set -e  # Exit on any error
 
@@ -97,35 +97,34 @@ run_quick_tests() {
     fi
 }
 
+
+
 run_full_tests() {
-    log_info "Running full test suite - EXACT CI SIMULATION..."
+    log_info "Running full test suite (CI mirror for pre-commit validation)..."
     
-    # Note: This simulates the CI test command but assumes dependencies are already installed
-    # Full CI also runs: pip install -e ".[dev,test]" before testing
-    log_info "Note: Using existing environment (CI installs fresh dependencies)"
+    log_warning "IMPORTANT: This validates LOCAL changes before push"
+    echo "  → Mirrors GitHub Actions CI commands as closely as possible"
+    echo "  → Use this before 'git push' to catch issues early"
 
     if command -v pytest >/dev/null 2>&1; then
         local pytest_version=$(pytest --version 2>/dev/null | head -1 || echo "unknown")
-        log_info "Running EXACT GitHub Actions test command... (${pytest_version})"
+        log_info "Running mirrored GitHub Actions test command... (${pytest_version})"
 
         # Show test files being discovered
         local test_files=$(find tests/ -name "test_*.py" 2>/dev/null | wc -l || echo "0")
         echo "  → Discovered ${test_files} test files"
-        echo "  → Running EXACT command from .github/workflows/ci.yml:"
-        echo "  → pytest --cov=numerous.pytest_llm_validate --cov-report=xml --cov-report=term-missing"
-        echo "  → This is identical to what GitHub Actions runs"
+        echo "  → Command: pytest --cov=numerous.pytest_llm_validate --cov-report=xml --cov-report=term-missing"
+        echo "  → This mirrors .github/workflows/ci.yml test command"
 
-        # Run the EXACT same command as GitHub Actions CI
+        # Run the same command as GitHub Actions CI
         if pytest --cov=numerous.pytest_llm_validate --cov-report=xml --cov-report=term-missing 2>&1; then
-            log_success "✓ CI simulation tests passed"
-            echo "  → This means GitHub Actions CI should also pass!"
+            log_success "✓ Pre-commit CI validation passed"
+            echo "  → Local changes should pass GitHub Actions CI"
         else
-            log_error "✗ CI simulation tests failed"
+            log_error "✗ Pre-commit CI validation failed"
             echo ""
-            log_error "This failure will cause GitHub Actions CI to fail!"
-            log_info "The command that failed is EXACTLY what runs in CI:"
-            log_info "pytest --cov=numerous.pytest_llm_validate --cov-report=xml --cov-report=term-missing"
-            log_info "Fix the issues above to ensure CI passes"
+            log_error "These failures will cause GitHub Actions CI to fail!"
+            log_info "Fix the issues above before pushing"
             return 1
         fi
     else
@@ -133,17 +132,14 @@ run_full_tests() {
     fi
 }
 
-run_actual_ci() {
-    log_info "Running ACTUAL GitHub Actions CI (not simulation)..."
+debug_ci() {
+    log_info "GitHub Actions CI debugging tools..."
     
     # Check if GitHub CLI is available
     if ! command -v gh >/dev/null 2>&1; then
         log_error "GitHub CLI (gh) not found!"
         echo "  → Install with: brew install gh (macOS) or apt install gh (Ubuntu)"
         echo "  → Or download from: https://cli.github.com/"
-        echo ""
-        log_error "Cannot run real CI without GitHub CLI"
-        echo "  → Use 'full-test' for local simulation instead"
         return 1
     fi
 
@@ -151,46 +147,22 @@ run_actual_ci() {
     if ! gh auth status >/dev/null 2>&1; then
         log_error "Not authenticated with GitHub CLI!"
         echo "  → Run: gh auth login"
-        echo ""
-        log_error "Cannot run real CI without authentication"
-        echo "  → Use 'full-test' for local simulation instead"
         return 1
     fi
 
-    # Get current branch
-    local current_branch=$(git branch --show-current 2>/dev/null || echo "main")
+    log_info "Available CI debugging commands:"
+    echo "  → Watch latest CI run: gh run watch"
+    echo "  → List recent runs: gh run list --workflow=ci.yml"
+    echo "  → View latest run logs: gh run view --log"
+    echo "  → Trigger new CI run: gh workflow run ci.yml"
+    echo ""
     
-    log_info "Triggering actual CI workflow on branch: ${current_branch}"
-    echo "  → This runs the REAL CI with fresh environment"
-    echo "  → No synchronization needed - it's the actual .github/workflows/ci.yml"
-    echo "  → Results will be definitive"
-
-    # Trigger the workflow
-    log_info "Triggering workflow..."
-    if gh workflow run ci.yml --ref "$current_branch"; then
-        log_success "✓ CI workflow triggered successfully!"
-        echo "  → The ACTUAL GitHub Actions CI is now running"
-        echo "  → View progress in GitHub Actions tab of your repository"
+    log_info "Recent CI runs:"
+    if gh run list --workflow=ci.yml --limit=5 2>/dev/null; then
         echo ""
-        log_info "Options to check results:"
-        echo "  → Watch live: gh run watch --workflow=ci.yml"
-        echo "  → List runs: gh run list --workflow=ci.yml"
-        echo "  → View logs: gh run view --log"
-        echo ""
-        log_info "Since the ACTUAL CI was triggered, this counts as definitive validation!"
-        echo "  → No synchronization issues possible"
-        echo "  → Real environment with fresh dependencies"
-        echo "  → Same exact workflow as merge/PR checks"
-        return 0
+        log_info "Use 'gh run view <run-id> --log' to see detailed logs"
     else
-        log_error "Failed to trigger CI workflow"
-        echo "  → Make sure you have push access to the repository"
-        echo "  → Check branch protection rules"
-        echo "  → Verify the workflow file exists: .github/workflows/ci.yml"
-        echo ""
-        log_error "Cannot run real CI - workflow trigger failed"
-        echo "  → Use 'full-test' for local simulation instead"
-        return 1
+        log_warning "Could not fetch recent runs"
     fi
 }
 
@@ -293,7 +265,7 @@ print_validation_summary() {
 print_environment_info() {
     echo -e "${BLUE}"
     echo "=============================================="
-    echo "    Pre-commit CI Simulation (Lightweight)"
+    echo "      Pre-commit Development Tools"
     echo "=============================================="
     echo -e "${NC}"
 
@@ -353,23 +325,29 @@ main() {
             validate_commit_messages
             print_validation_summary "full-test"
             ;;
-        "real-ci")
-            run_actual_ci
-            echo ""
-            validate_commit_messages
-            print_validation_summary "real-ci"
+        "debug-ci")
+            debug_ci
             ;;
         *)
             log_error "Unknown command: $1"
-            echo "Usage: $0 {lint|test|all|commit-check|full-test|real-ci}"
+            echo "Usage: $0 {lint|test|all|full-test|commit-check|debug-ci}"
             echo ""
-            echo "Commands:"
+            echo "PRE-COMMIT COMMANDS (validate local changes before push):"
             echo "  lint        - Run linting checks + commit validation"
-            echo "  test        - Run tests + commit validation"
-            echo "  all         - Run comprehensive checks + commit validation"
+            echo "  test        - Run quick tests + commit validation"
+            echo "  all         - Run linting + full tests + commit validation (recommended)"
+            echo "  full-test   - Run full test suite with coverage (mirrors GitHub Actions)"
             echo "  commit-check - Run only commit message validation"
-            echo "  full-test   - Run full test suite with coverage (CI simulation)"
-            echo "  real-ci     - Trigger ACTUAL GitHub Actions CI (requires gh CLI)"
+            echo ""
+            echo "POST-PUSH COMMANDS (debug GitHub Actions CI):"
+            echo "  debug-ci    - Show GitHub CLI commands to watch/debug CI runs"
+            echo ""
+            echo "WORKFLOW:"
+            echo "  1. Make changes locally"
+            echo "  2. Run: ./scripts/precommit-ci.sh all"
+            echo "  3. Fix any issues found"
+            echo "  4. Push: git push"
+            echo "  5. If CI fails: ./scripts/precommit-ci.sh debug-ci"
             exit 1
             ;;
     esac
