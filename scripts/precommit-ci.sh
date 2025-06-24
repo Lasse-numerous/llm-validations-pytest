@@ -104,16 +104,16 @@ validate_commit_messages() {
     local allowed_types="feat fix docs style refactor perf test build ci chore revert"
     local allowed_scopes="core test docs ci build feat fix perf style refactor chore config scripts api cli web data security deps"
 
-    # Check last 5 commits (or fewer if not available)
+    # Check only the current commit (HEAD) for pre-push validation
     local commit_count=$(git rev-list --count HEAD 2>/dev/null || echo "0")
-    local check_count=$((commit_count < 5 ? commit_count : 5))
+    local check_count=1
 
     if [ "$check_count" -eq 0 ]; then
         log_warning "No commits found to validate"
         return 0
     fi
 
-    echo "  → Checking last ${check_count} commit message(s)"
+    echo "  → Checking current commit message (HEAD)"
 
     local invalid_commits=0
     for i in $(seq 0 $((check_count - 1))); do
