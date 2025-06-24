@@ -147,3 +147,4 @@ Thumbs.db
 # Project specific
 .history/
 bandit-report.json
+.pytest-llm-validate-history.json

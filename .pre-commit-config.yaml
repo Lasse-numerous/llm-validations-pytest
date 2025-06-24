@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -12,14 +12,14 @@ repos:
       - id: debug-statements
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.7.0
+    rev: v0.12.0
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
+    rev: v1.16.1
     hooks:
       - id: mypy
         additional_dependencies:
@@ -30,11 +30,22 @@ repos:
           - uvicorn
           - rich
           - httpx
-        exclude: ^(tests/|docs/)
+        exclude: ^docs/
 
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
+    rev: 1.8.5
     hooks:
       - id: bandit
         args: ["-c", "pyproject.toml"]
         additional_dependencies: ["bandit[toml]"]
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: sh
+        language: system
+        types: [python]
+        args: [-c, "pytest --tb=short -q --no-cov --override-ini='addopts=' tests/; rm -f .pytest-llm-validate-history.json .coverage"]
+        pass_filenames: false
+        always_run: true
