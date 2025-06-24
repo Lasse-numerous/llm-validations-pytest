@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build_meta"
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "pytest-llm-validate"
@@ -70,8 +70,9 @@ pytest-llm-mcp = "numerous.pytest_llm_validate.cli:main"
 [project.entry-points.pytest11]
 llm_validate = "numerous.pytest_llm_validate.plugin"
 
-[tool.hatch.build.targets.wheel]
-packages = ["numerous"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["numerous*"]
 
 [tool.ruff]
 line-length = 88

@@ -1,5 +1,6 @@
 """Tests for the llm_eval fixture functionality."""
 
+from collections.abc import Callable
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -11,12 +12,14 @@ from numerous.pytest_llm_validate.models import EvalRequest, EvalResult
 class TestLLMEvalFixture:
     """Test cases for llm_eval fixture functionality."""
 
-    def test_fixture_availability(self, llm_eval) -> None:
+    def test_fixture_availability(self, llm_eval: Callable[..., Tester]) -> None:
         """Test that llm_eval fixture is available."""
         assert llm_eval is not None
         assert callable(llm_eval)
 
-    def test_fixture_returns_tester_object(self, llm_eval) -> None:
+    def test_fixture_returns_tester_object(
+        self, llm_eval: Callable[..., Tester]
+    ) -> None:
         """Test that fixture returns a tester object with check method."""
         tester = llm_eval("Should return tester object")
         assert isinstance(tester, Tester)
@@ -25,7 +28,9 @@ class TestLLMEvalFixture:
         assert hasattr(tester, "get_summary")
 
     @patch("numerous.pytest_llm_validate.fixture.get_agent")
-    def test_tester_check_method_works(self, mock_get_agent: Mock, llm_eval) -> None:
+    def test_tester_check_method_works(
+        self, mock_get_agent: Mock, llm_eval: Callable[..., Tester]
+    ) -> None:
         """Test that tester.check() method works correctly."""
         # Mock the agent evaluation
         from numerous.pytest_llm_validate.loader import get_default_rule
@@ -63,7 +68,9 @@ class TestLLMEvalFixture:
         assert results[0].score == 0.8
 
     @patch("numerous.pytest_llm_validate.fixture.get_agent")
-    def test_multiple_checks_supported(self, mock_get_agent: Mock, llm_eval) -> None:
+    def test_multiple_checks_supported(
+        self, mock_get_agent: Mock, llm_eval: Callable[..., Tester]
+    ) -> None:
         """Test that multiple check calls are supported."""
         # Mock the agent evaluation
         from numerous.pytest_llm_validate.loader import get_default_rule
@@ -105,7 +112,7 @@ class TestLLMEvalFixture:
         assert summary["passed"] == 2
         assert summary["failed"] == 0
 
-    def test_fixture_with_options(self, llm_eval) -> None:
+    def test_fixture_with_options(self, llm_eval: Callable[..., Tester]) -> None:
         """Test that fixture accepts optional parameters."""
         tester = llm_eval("Test with options", threshold=0.8, model="gpt-4o-mini")
         assert isinstance(tester, Tester)
@@ -114,7 +121,9 @@ class TestLLMEvalFixture:
         assert tester.model == "gpt-4o-mini"
 
     @patch("numerous.pytest_llm_validate.fixture.get_agent")
-    def test_tester_check_failure(self, mock_get_agent: Mock, llm_eval) -> None:
+    def test_tester_check_failure(
+        self, mock_get_agent: Mock, llm_eval: Callable[..., Tester]
+    ) -> None:
         """Test that tester.check() raises AssertionError on failure."""
         # Mock the agent evaluation to fail
         from numerous.pytest_llm_validate.loader import get_default_rule
@@ -149,7 +158,7 @@ class TestLLMEvalFixture:
         assert "score: 0.30" in error_msg
         assert "Poor quality" in error_msg
 
-    def test_tester_summary_empty(self, llm_eval) -> None:
+    def test_tester_summary_empty(self, llm_eval: Callable[..., Tester]) -> None:
         """Test tester summary when no checks have been performed."""
         tester = llm_eval("Test specification")
         summary = tester.get_summary()
@@ -161,7 +170,9 @@ class TestLLMEvalFixture:
         assert summary["checks"] == []
 
     @patch("numerous.pytest_llm_validate.fixture.get_agent")
-    def test_tester_with_custom_rule(self, mock_get_agent: Mock, llm_eval) -> None:
+    def test_tester_with_custom_rule(
+        self, mock_get_agent: Mock, llm_eval: Callable[..., Tester]
+    ) -> None:
         """Test tester with custom evaluation rule."""
         # Mock the agent evaluation
         from numerous.pytest_llm_validate.loader import get_rule

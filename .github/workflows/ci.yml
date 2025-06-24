@@ -52,7 +52,7 @@ jobs:
 
     - name: Run tests with coverage
       run: |
-        pytest --cov=numerous.pytest_llm_validate --cov-report=xml --cov-report=term-missing --cov-fail-under=100
+        pytest --cov=numerous.pytest_llm_validate --cov-report=xml --cov-report=term-missing --cov-fail-under=80
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 

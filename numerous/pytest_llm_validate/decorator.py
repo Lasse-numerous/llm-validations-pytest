@@ -108,12 +108,11 @@ def llm_eval(
                 # No cached result, perform fresh evaluation
                 try:
                     # Run async evaluation in sync context
-                    eval_result = asyncio.get_event_loop().run_until_complete(
-                        get_agent().evaluate(request)
-                    )
-                except RuntimeError:
-                    # If no event loop is running, create a new one
                     eval_result = asyncio.run(get_agent().evaluate(request))
+                except RuntimeError:
+                    # If there's already an event loop running, use it
+                    loop = asyncio.get_event_loop()
+                    eval_result = loop.run_until_complete(get_agent().evaluate(request))
 
                 # Cache the result if deduplication is enabled
                 if not no_dedupe:
