@@ -297,6 +297,29 @@ gh run view --log             # Inspect failure details
 - **Local validation**: Catch issues before push using CI mirror
 - **Remote debugging**: Inspect actual CI failures using GitHub CLI
 
+### Final Architecture: Everything in Pre-commit Config
+
+After the insight about GitHub CLI limitations, completed the logical next step:
+
+**MOVED ALL VALIDATION TO `.pre-commit-config.yaml`**:
+- **Ruff** (linting + formatting) - direct from official repo
+- **MyPy** (type checking) - with proper dependencies (pydantic, pytest)
+- **Quick tests** - run on every commit (fast feedback)
+- **Full tests with coverage** - run on pre-push (exact CI mirror)
+- **Conventional commits** - automatic validation
+- **Security checks** (bandit), docs checks, etc.
+
+**SIMPLIFIED BASH SCRIPT**:
+- Now just a manual tool for debugging
+- Shows GitHub CLI commands for CI debugging
+- No longer needed for regular development workflow
+
+**RESULT**:
+- ✅ **Automatic validation**: `git commit` and `git push` handle everything
+- ✅ **No manual steps**: Developers just use git normally
+- ✅ **Perfect CI mirroring**: Same commands, same environment
+- ✅ **Clean separation**: Automatic validation vs manual debugging
+
 ---
 
 ## Previous Issue: Plugin Registration Conflict (Resolved)
