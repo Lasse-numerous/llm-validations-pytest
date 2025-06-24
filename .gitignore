@@ -148,3 +148,4 @@ Thumbs.db
 .history/
 bandit-report.json
 .pytest-llm-validate-history.json
+.ci-debug-logs/
