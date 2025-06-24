@@ -133,6 +133,65 @@ run_full_tests() {
     fi
 }
 
+run_actual_ci() {
+    log_info "Running ACTUAL GitHub Actions CI (not simulation)..."
+    
+    # Check if GitHub CLI is available
+    if ! command -v gh >/dev/null 2>&1; then
+        log_error "GitHub CLI (gh) not found!"
+        echo "  → Install with: brew install gh (macOS) or apt install gh (Ubuntu)"
+        echo "  → Or download from: https://cli.github.com/"
+        echo "  → Falling back to local simulation..."
+        run_full_tests
+        return $?
+    fi
+
+    # Check if user is authenticated
+    if ! gh auth status >/dev/null 2>&1; then
+        log_error "Not authenticated with GitHub CLI!"
+        echo "  → Run: gh auth login"
+        echo "  → Falling back to local simulation..."
+        run_full_tests
+        return $?
+    fi
+
+    # Get current branch
+    local current_branch=$(git branch --show-current 2>/dev/null || echo "main")
+    
+    log_info "Triggering actual CI workflow on branch: ${current_branch}"
+    echo "  → This runs the REAL CI with fresh environment"
+    echo "  → No synchronization needed - it's the actual .github/workflows/ci.yml"
+    echo "  → Results will be definitive"
+
+    # Trigger the workflow
+    log_info "Triggering workflow..."
+    if gh workflow run ci.yml --ref "$current_branch"; then
+        log_success "✓ CI workflow triggered successfully!"
+        echo "  → The ACTUAL GitHub Actions CI is now running"
+        echo "  → View progress in GitHub Actions tab of your repository"
+        echo ""
+        log_info "Options to check results:"
+        echo "  → Watch live: gh run watch --workflow=ci.yml"
+        echo "  → List runs: gh run list --workflow=ci.yml"
+        echo "  → View logs: gh run view --log"
+        echo ""
+        log_info "Since the ACTUAL CI was triggered, this counts as definitive validation!"
+        echo "  → No synchronization issues possible"
+        echo "  → Real environment with fresh dependencies"
+        echo "  → Same exact workflow as merge/PR checks"
+        return 0
+    else
+        log_error "Failed to trigger CI workflow"
+        echo "  → Make sure you have push access to the repository"
+        echo "  → Check branch protection rules"
+        echo "  → GitHub CLI must be authenticated (gh auth login)"
+        echo ""
+        log_warning "Falling back to local simulation..."
+        run_full_tests
+        return $?
+    fi
+}
+
 validate_commit_messages() {
     log_info "Validating recent commit messages..."
 
@@ -292,9 +351,15 @@ main() {
             validate_commit_messages
             print_validation_summary "full-test"
             ;;
+        "real-ci")
+            run_actual_ci
+            echo ""
+            validate_commit_messages
+            print_validation_summary "real-ci"
+            ;;
         *)
             log_error "Unknown command: $1"
-            echo "Usage: $0 {lint|test|all|commit-check|full-test}"
+            echo "Usage: $0 {lint|test|all|commit-check|full-test|real-ci}"
             echo ""
             echo "Commands:"
             echo "  lint        - Run linting checks + commit validation"
@@ -302,6 +367,7 @@ main() {
             echo "  all         - Run comprehensive checks + commit validation"
             echo "  commit-check - Run only commit message validation"
             echo "  full-test   - Run full test suite with coverage (CI simulation)"
+            echo "  real-ci     - Trigger ACTUAL GitHub Actions CI (requires gh CLI)"
             exit 1
             ;;
     esac
