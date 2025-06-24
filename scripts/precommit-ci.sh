@@ -98,27 +98,34 @@ run_quick_tests() {
 }
 
 run_full_tests() {
-    log_info "Running full test suite with coverage (CI simulation)..."
+    log_info "Running full test suite - EXACT CI SIMULATION..."
+    
+    # Note: This simulates the CI test command but assumes dependencies are already installed
+    # Full CI also runs: pip install -e ".[dev,test]" before testing
+    log_info "Note: Using existing environment (CI installs fresh dependencies)"
 
     if command -v pytest >/dev/null 2>&1; then
         local pytest_version=$(pytest --version 2>/dev/null | head -1 || echo "unknown")
-        log_info "Running full pytest with CI configuration... (${pytest_version})"
+        log_info "Running EXACT GitHub Actions test command... (${pytest_version})"
 
         # Show test files being discovered
         local test_files=$(find tests/ -name "test_*.py" 2>/dev/null | wc -l || echo "0")
         echo "  → Discovered ${test_files} test files"
-        echo "  → Using full CI configuration from pyproject.toml"
-        echo "  → Including coverage measurement and plugin loading"
+        echo "  → Running EXACT command from .github/workflows/ci.yml:"
+        echo "  → pytest --cov=numerous.pytest_llm_validate --cov-report=xml --cov-report=term-missing"
+        echo "  → This is identical to what GitHub Actions runs"
 
-        # Run tests with full CI configuration (uses pyproject.toml settings)
-        if pytest --tb=short -q 2>&1; then
-            log_success "✓ Full CI tests passed"
+        # Run the EXACT same command as GitHub Actions CI
+        if pytest --cov=numerous.pytest_llm_validate --cov-report=xml --cov-report=term-missing 2>&1; then
+            log_success "✓ CI simulation tests passed"
+            echo "  → This means GitHub Actions CI should also pass!"
         else
-            log_error "✗ Full CI tests failed"
+            log_error "✗ CI simulation tests failed"
             echo ""
-            log_error "This failure would cause CI to fail on GitHub Actions!"
-            log_info "Check the detailed output above for specific issues"
-            log_info "Common issues: plugin conflicts, coverage threshold, import errors"
+            log_error "This failure will cause GitHub Actions CI to fail!"
+            log_info "The command that failed is EXACTLY what runs in CI:"
+            log_info "pytest --cov=numerous.pytest_llm_validate --cov-report=xml --cov-report=term-missing"
+            log_info "Fix the issues above to ensure CI passes"
             return 1
         fi
     else
