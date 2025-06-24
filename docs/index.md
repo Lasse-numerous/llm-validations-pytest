@@ -53,4 +53,7 @@ export OPENAI_API_KEY="your-api-key-here"
 
 ## Documentation
 
-- [Technical Resume](resume.md) - Detailed technical architecture and implementation details
+- **[Product Requirements](product-requirements.md)** - Complete product specification with development roadmap
+- **[Developer Workflow](developer-workflow.md)** - Comprehensive development guide and best practices
+- **[CI Debugging](ci-debugging.md)** - Tools and techniques for debugging CI pipeline issues
+- **[Technical Resume](resume.md)** - Detailed technical architecture and implementation details

@@ -2,6 +2,8 @@
 
 We welcome contributions to pytest-LLM-Validate! This document outlines the development workflow, coding standards, and contribution process.
 
+> **📋 For complete product specification and development roadmap, see [Product Requirements Document](docs/product-requirements.md)**
+
 ## Development Workflow
 
 ### Branching Strategy
@@ -244,11 +246,13 @@ The project follows a structured development plan with clear phases:
 
 1. **Phase 1**: Repository & Toolchain Foundation (v0.1.0-rc1) ✅ **COMPLETED**
 2. **Phase 2**: Core Library & Evaluation APIs (v0.1.0) ✅ **COMPLETED**
-3. **Phase 3**: CLI Interface (v0.2.0)
-4. **Phase 4**: FastAPI REST Backend (v0.3.0)
-5. **Phase 5**: MCP Integration (v0.4.0)
-6. **Phase 6**: Reporting & QA (v0.5.0)
-7. **Phase 7**: Final Docs & Release (v1.0.0)
+3. **Phase 3**: CLI Interface (v0.2.0) 🚧 **IN PROGRESS**
+4. **Phase 4**: FastAPI REST Backend (v0.3.0) ⏳ **PLANNED**
+5. **Phase 5**: MCP Integration (v0.4.0) ⏳ **PLANNED**
+6. **Phase 6**: Reporting & QA (v0.5.0) ⏳ **PLANNED**
+7. **Phase 7**: Final Docs & Release (v1.0.0) ⏳ **PLANNED**
+
+> **📋 For detailed task breakdown and ticket-level planning, see [Product Requirements Document](docs/product-requirements.md)**
 
 ## Developer Workflow Best Practices
 

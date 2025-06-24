@@ -4,9 +4,10 @@ site_url: https://github.com/user/pytest-llm-validate
 
 nav:
   - Home: index.md
+  - Product Requirements: product-requirements.md
   - Developer Workflow: developer-workflow.md
   - CI Debugging: ci-debugging.md
-  - Resume: resume.md
+  - Technical Resume: resume.md
 
 theme:
   name: material
