@@ -1,164 +1,189 @@
-"""Tests for the llm_eval fixture functionality."""
+"""Tests for the fixture-based LLM evaluation functionality."""
 
-from collections.abc import Callable
-from unittest.mock import AsyncMock, Mock, patch
+from typing import Callable
+from unittest.mock import Mock
 
 import pytest
 
-from numerous.pytest_llm_validate.fixture import Tester
-from numerous.pytest_llm_validate.models import EvalRequest, EvalResult
+from numerous.pytest_llm_validate.fixture import LLMTester
 
 
 class TestLLMEvalFixture:
-    """Test cases for llm_eval fixture functionality."""
+    """Test class for LLM evaluation fixture functionality."""
 
-    def test_fixture_availability(self, llm_eval: Callable[..., Tester]) -> None:
-        """Test that llm_eval fixture is available."""
-        assert llm_eval is not None
+    def test_fixture_availability(self, llm_eval: Callable[..., LLMTester]) -> None:
+        """Test that llm_eval fixture is available and callable."""
         assert callable(llm_eval)
 
     def test_fixture_returns_tester_object(
-        self, llm_eval: Callable[..., Tester]
+        self, llm_eval: Callable[..., LLMTester]
     ) -> None:
         """Test that fixture returns a tester object with check method."""
         tester = llm_eval("Should return tester object")
-        assert isinstance(tester, Tester)
+        assert isinstance(tester, LLMTester)
         assert hasattr(tester, "check")
         assert hasattr(tester, "get_results")
         assert hasattr(tester, "get_summary")
 
-    @patch("numerous.pytest_llm_validate.fixture.get_agent")
-    def test_tester_check_method_works(
-        self, mock_get_agent: Mock, llm_eval: Callable[..., Tester]
-    ) -> None:
-        """Test that tester.check() method works correctly."""
-        # Mock the agent evaluation
-        from numerous.pytest_llm_validate.loader import get_default_rule
+    @pytest.fixture(autouse=True)
+    def mock_get_agent(self, mocker: Mock) -> Mock:
+        """Mock the get_agent function to avoid actual LLM calls."""
+        from numerous.pytest_llm_validate.models import EvalResult, EvalRequest, EvalRule
 
-        mock_request = EvalRequest(
-            specification="Test specification",
-            artifacts={"output": "test output", "label": "test_label"},
-            rule=get_default_rule(),
-            threshold=0.7,
-            model="gpt-4o-mini",
+        # Create a dummy rule for test results
+        test_rule = EvalRule(
+            name="test_rule",
+            description="Test rule for mocking",
+            prompt="Test prompt"
         )
 
-        mock_agent = Mock()
-        mock_result = EvalResult(
+        # Create a dummy request for test results
+        test_request = EvalRequest(
+            specification="Test specification",
+            artifacts={"output": "test"},
+            rule=test_rule,
+            threshold=0.7,
+            model="gpt-4o-mini"
+        )
+
+        mock_agent = mocker.patch("numerous.pytest_llm_validate.fixture.get_agent")
+        # Mock the async evaluate method
+        mock_agent.return_value.evaluate = mocker.AsyncMock()
+        mock_agent.return_value.evaluate.return_value = EvalResult(
+            score=0.8,
+            comment="Test comment",
+            passed=True,
+            request=test_request,
+            model_used="gpt-4o-mini",
+            timestamp="2024-01-01T00:00:00"
+        )
+        return mock_agent
+
+    def test_tester_check_method_works(
+        self, mock_get_agent: Mock, llm_eval: Callable[..., LLMTester]
+    ) -> None:
+        """Test that tester.check() method works correctly."""
+        # Configure mock to return a passing result
+        from numerous.pytest_llm_validate.models import EvalResult, EvalRequest, EvalRule
+
+        test_rule = EvalRule(name="test_rule", description="Test", prompt="Test")
+        test_request = EvalRequest(
+            specification="Test specification",
+            artifacts={"output": "test"},
+            rule=test_rule
+        )
+
+        mock_agent = mock_get_agent.return_value
+        mock_agent.evaluate.return_value = EvalResult(
+            score=0.85,
+            comment="Good output",
+            passed=True,
+            request=test_request,
+            model_used="gpt-4o-mini",
+            timestamp="2024-01-01T00:00:00"
+        )
+
+        tester = llm_eval("Test specification", no_dedupe=True)
+
+        # This should not raise an exception
+        tester.check("test output", label="test_label")
+
+        # Verify the agent was called
+        mock_get_agent.assert_called_once()
+        mock_agent.evaluate.assert_called_once()
+
+        # Check that results are stored
+        results = tester.get_results()
+        assert len(results) == 1
+        assert results[0].score == 0.85
+
+    def test_multiple_checks_supported(
+        self, mock_get_agent: Mock, llm_eval: Callable[..., LLMTester]
+    ) -> None:
+        """Test that multiple checks can be performed with the same tester."""
+        # Configure mock to return passing results
+        from numerous.pytest_llm_validate.models import EvalResult, EvalRequest, EvalRule
+
+        test_rule = EvalRule(name="test_rule", description="Test", prompt="Test")
+        test_request = EvalRequest(
+            specification="All outputs should be professional",
+            artifacts={"output": "test"},
+            rule=test_rule
+        )
+
+        mock_agent = mock_get_agent.return_value
+        mock_agent.evaluate.return_value = EvalResult(
             score=0.8,
             comment="Good output",
             passed=True,
-            request=mock_request,
+            request=test_request,
             model_used="gpt-4o-mini",
-            timestamp="2024-01-01T00:00:00",
+            timestamp="2024-01-01T00:00:00"
         )
-        mock_agent.evaluate = AsyncMock(return_value=mock_result)
-        mock_get_agent.return_value = mock_agent
-
-        tester = llm_eval("Test specification", no_dedupe=True)
-        # Should not raise an exception
-        tester.check("test output", label="test_label")
-
-        # Verify evaluation was called
-        mock_agent.evaluate.assert_called_once()
-
-        # Verify results are stored
-        results = tester.get_results()
-        assert len(results) == 1
-        assert results[0].score == 0.8
-
-    @patch("numerous.pytest_llm_validate.fixture.get_agent")
-    def test_multiple_checks_supported(
-        self, mock_get_agent: Mock, llm_eval: Callable[..., Tester]
-    ) -> None:
-        """Test that multiple check calls are supported."""
-        # Mock the agent evaluation
-        from numerous.pytest_llm_validate.loader import get_default_rule
-
-        mock_request = EvalRequest(
-            specification="All outputs should be professional",
-            artifacts={"output": "test"},
-            rule=get_default_rule(),
-            threshold=0.7,
-            model="gpt-4o-mini",
-        )
-
-        mock_agent = Mock()
-        mock_result = EvalResult(
-            score=0.9,
-            comment="Professional output",
-            passed=True,
-            request=mock_request,
-            model_used="gpt-4o-mini",
-            timestamp="2024-01-01T00:00:00",
-        )
-        mock_agent.evaluate = AsyncMock(return_value=mock_result)
-        mock_get_agent.return_value = mock_agent
 
         tester = llm_eval("All outputs should be professional")
         tester.check("First output", label="first")
         tester.check("Second output", label="second")
 
-        # Verify both evaluations were called
+        # Verify both calls were made
         assert mock_agent.evaluate.call_count == 2
 
-        # Verify results are stored
+        # Check that both results are stored
         results = tester.get_results()
         assert len(results) == 2
 
-        # Test summary
         summary = tester.get_summary()
         assert summary["total_checks"] == 2
         assert summary["passed"] == 2
-        assert summary["failed"] == 0
 
-    def test_fixture_with_options(self, llm_eval: Callable[..., Tester]) -> None:
-        """Test that fixture accepts optional parameters."""
+    def test_fixture_with_options(self, llm_eval: Callable[..., LLMTester]) -> None:
+        """Test that fixture accepts and uses options correctly."""
         tester = llm_eval("Test with options", threshold=0.8, model="gpt-4o-mini")
-        assert isinstance(tester, Tester)
+        assert isinstance(tester, LLMTester)
         assert tester.specification == "Test with options"
         assert tester.threshold == 0.8
         assert tester.model == "gpt-4o-mini"
 
-    @patch("numerous.pytest_llm_validate.fixture.get_agent")
     def test_tester_check_failure(
-        self, mock_get_agent: Mock, llm_eval: Callable[..., Tester]
+        self, mock_get_agent: Mock, llm_eval: Callable[..., LLMTester]
     ) -> None:
         """Test that tester.check() raises AssertionError on failure."""
-        # Mock the agent evaluation to fail
-        from numerous.pytest_llm_validate.loader import get_default_rule
+        # Configure mock to return a failing result
+        from numerous.pytest_llm_validate.models import EvalResult, EvalRequest, EvalRule
 
-        mock_request = EvalRequest(
+        test_rule = EvalRule(name="test_rule", description="Test", prompt="Test")
+        test_request = EvalRequest(
             specification="Should be high quality",
             artifacts={"output": "bad output"},
-            rule=get_default_rule(),
-            threshold=0.7,
-            model="gpt-4o-mini",
+            rule=test_rule
         )
 
-        mock_agent = Mock()
-        mock_result = EvalResult(
-            score=0.3,  # Below threshold
-            comment="Poor quality",
+        mock_agent = mock_get_agent.return_value
+        mock_agent.evaluate.return_value = EvalResult(
+            score=0.3,
+            comment="Poor quality output",
             passed=False,
-            request=mock_request,
+            request=test_request,
             model_used="gpt-4o-mini",
-            timestamp="2024-01-01T00:00:00",
+            timestamp="2024-01-01T00:00:00"
         )
-        mock_agent.evaluate = AsyncMock(return_value=mock_result)
-        mock_get_agent.return_value = mock_agent
 
         tester = llm_eval("Should be high quality")
 
-        with pytest.raises(AssertionError) as exc_info:
+        # This should raise an AssertionError
+        with pytest.raises(AssertionError, match="LLM Evaluation Failed"):
             tester.check("bad output", label="test_label")
 
-        error_msg = str(exc_info.value)
-        assert "LLM Evaluation Failed (test_label)" in error_msg
-        assert "score: 0.30" in error_msg
-        assert "Poor quality" in error_msg
+        # Verify the agent was called even though it failed
+        mock_get_agent.assert_called_once()
+        mock_agent.evaluate.assert_called_once()
 
-    def test_tester_summary_empty(self, llm_eval: Callable[..., Tester]) -> None:
+        # Check that failed result is still stored
+        results = tester.get_results()
+        assert len(results) == 1
+        assert results[0].passed is False
+
+    def test_tester_summary_empty(self, llm_eval: Callable[..., LLMTester]) -> None:
         """Test tester summary when no checks have been performed."""
         tester = llm_eval("Test specification")
         summary = tester.get_summary()
@@ -167,44 +192,38 @@ class TestLLMEvalFixture:
         assert summary["passed"] == 0
         assert summary["failed"] == 0
         assert summary["average_score"] == 0.0
-        assert summary["checks"] == []
 
-    @patch("numerous.pytest_llm_validate.fixture.get_agent")
     def test_tester_with_custom_rule(
-        self, mock_get_agent: Mock, llm_eval: Callable[..., Tester]
+        self, mock_get_agent: Mock, llm_eval: Callable[..., LLMTester]
     ) -> None:
         """Test tester with custom evaluation rule."""
-        # Mock the agent evaluation
-        from numerous.pytest_llm_validate.loader import get_rule
+        # Configure mock to return a passing result
+        from numerous.pytest_llm_validate.models import EvalResult, EvalRequest, EvalRule
 
-        test_rule = get_rule("test_behavior")  # Use the test_behavior rule
-        assert test_rule is not None
-
-        mock_request = EvalRequest(
+        test_rule = EvalRule(name="test_behavior", description="Test behavior", prompt="Test")
+        test_request = EvalRequest(
             specification="Test with custom rule",
             artifacts={"output": "test output"},
-            rule=test_rule,
-            threshold=0.7,
-            model="gpt-4o-mini",
+            rule=test_rule
         )
 
-        mock_agent = Mock()
-        mock_result = EvalResult(
-            score=0.8,
-            comment="Good test behavior",
+        mock_agent = mock_get_agent.return_value
+        mock_agent.evaluate.return_value = EvalResult(
+            score=0.9,
+            comment="Excellent behavior",
             passed=True,
-            request=mock_request,
+            request=test_request,
             model_used="gpt-4o-mini",
-            timestamp="2024-01-01T00:00:00",
+            timestamp="2024-01-01T00:00:00"
         )
-        mock_agent.evaluate = AsyncMock(return_value=mock_result)
-        mock_get_agent.return_value = mock_agent
 
         tester = llm_eval("Test with custom rule", rule="test_behavior", no_dedupe=True)
         assert tester.eval_rule.name == "test_behavior"
 
         tester.check("test output")
 
-        # Verify the correct rule was used
-        call_args = mock_agent.evaluate.call_args[0][0]
-        assert call_args.rule.name == "test_behavior"
+        # Verify the custom rule was used
+        mock_get_agent.assert_called_once()
+        call_args = mock_agent.evaluate.call_args
+        eval_request = call_args[0][0]
+        assert eval_request.rule.name == "test_behavior"

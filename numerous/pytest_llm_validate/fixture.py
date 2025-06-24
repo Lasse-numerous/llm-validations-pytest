@@ -9,7 +9,7 @@ from .loader import get_default_rule, get_rule
 from .models import EvalRequest, EvalResult
 
 
-class Tester:
+class LLMTester:
     """Tester object for performing multiple LLM evaluations."""
 
     def __init__(
@@ -182,7 +182,7 @@ def create_llm_eval_tester(
     rule: str | None = None,
     no_dedupe: bool = False,
     **metadata: Any,
-) -> Tester:
+) -> LLMTester:
     """Create a new Tester instance for LLM evaluation.
 
     This function is used by the pytest fixture to create Tester objects.
@@ -204,7 +204,7 @@ def create_llm_eval_tester(
             tester.check("Hello, how are you?", label="greeting")
             tester.check("Thank you for your inquiry.", label="response")
     """
-    return Tester(
+    return LLMTester(
         specification,
         threshold=threshold,
         model=model,
