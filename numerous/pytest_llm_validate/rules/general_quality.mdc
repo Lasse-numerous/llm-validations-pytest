@@ -1,10 +1,10 @@
 # General Quality Evaluation Rule
 
-**Name:** general_quality  
-**Description:** Evaluates general code output quality, correctness, and alignment with specifications  
-**Version:** 1.0  
-**Author:** pytest-llm-validate  
-**Tags:** quality, general, correctness  
+**Name:** general_quality
+**Description:** Evaluates general code output quality, correctness, and alignment with specifications
+**Version:** 1.0
+**Author:** pytest-llm-validate
+**Tags:** quality, general, correctness
 
 ## Evaluation Prompt
 
@@ -19,7 +19,7 @@ You are an expert code reviewer tasked with evaluating whether code output meets
 Evaluate the code output against the specification considering:
 
 1. **Correctness** (40%): Does the output correctly implement what was specified?
-2. **Quality** (30%): Is the code well-structured, readable, and following best practices?  
+2. **Quality** (30%): Is the code well-structured, readable, and following best practices?
 3. **Completeness** (20%): Does the output fully address all aspects of the specification?
 4. **Appropriateness** (10%): Is the output appropriate for the given context?
 
@@ -34,7 +34,7 @@ Provide your evaluation in the following JSON format:
 }
 ```
 
-**Important:** 
+**Important:**
 - Score must be between 0.0 and 1.0
 - Be objective and constructive in your feedback
 - Consider the specification as the ground truth for expectations

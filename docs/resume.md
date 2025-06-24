@@ -94,8 +94,8 @@
 ## Maintainer Information
 
 ### Primary Contact
-**Organization**: Numerous  
-**Repository**: https://github.com/numerous-com/pytest-llm-validate  
+**Organization**: Numerous
+**Repository**: https://github.com/numerous-com/pytest-llm-validate
 **Documentation**: https://pytest-llm-validate.readthedocs.io/
 
 ### Development Philosophy

@@ -1,10 +1,10 @@
 # Output Format Evaluation Rule
 
-**Name:** output_format  
-**Description:** Evaluates output formatting, structure, and presentation quality  
-**Version:** 1.0  
-**Author:** pytest-llm-validate  
-**Tags:** format, structure, presentation, ui  
+**Name:** output_format
+**Description:** Evaluates output formatting, structure, and presentation quality
+**Version:** 1.0
+**Author:** pytest-llm-validate
+**Tags:** format, structure, presentation, ui
 
 ## Evaluation Prompt
 

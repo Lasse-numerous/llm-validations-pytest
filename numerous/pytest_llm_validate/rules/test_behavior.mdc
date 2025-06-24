@@ -1,10 +1,10 @@
 # Test Behavior Evaluation Rule
 
-**Name:** test_behavior  
-**Description:** Evaluates test functions and their behavior against expected testing patterns  
-**Version:** 1.0  
-**Author:** pytest-llm-validate  
-**Tags:** testing, behavior, validation  
+**Name:** test_behavior
+**Description:** Evaluates test functions and their behavior against expected testing patterns
+**Version:** 1.0
+**Author:** pytest-llm-validate
+**Tags:** testing, behavior, validation
 
 ## Evaluation Prompt
 

@@ -1,0 +1,74 @@
+{
+  "cd5bdcd945b97926c9fea3c1facc7f249a4487c6e6bdfb49849a313baa5dd105": {
+    "score": 0.8,
+    "comment": "Good output",
+    "passed": true,
+    "model_used": "gpt-4o-mini",
+    "timestamp": "2024-01-01T00:00:00",
+    "cached_at": "2025-06-24T06:35:06.538211"
+  },
+  "cb8245c17d1738cb5e2e0e43da20d193800298cfe4f7b1050a6c9d9cb4cb0fdf": {
+    "score": 0.9,
+    "comment": "Good output with print",
+    "passed": true,
+    "model_used": "gpt-4o-mini",
+    "timestamp": "2024-01-01T00:00:00",
+    "cached_at": "2025-06-24T06:35:06.540658"
+  },
+  "3ebc87c620e055e7e3ab39c0f57b3cfc1eb16c4fedf12b872bce16266fcf4235": {
+    "score": 0.3,
+    "comment": "Poor quality output",
+    "passed": false,
+    "model_used": "gpt-4o-mini",
+    "timestamp": "2024-01-01T00:00:00",
+    "cached_at": "2025-06-24T06:33:58.797043"
+  },
+  "c6c30dc04bab5da8cb3359655371d0eda244fef8431ee1e7a218d13ed2cbe035": {
+    "score": 0.6,
+    "comment": "Moderate quality",
+    "passed": true,
+    "model_used": "gpt-4o-mini",
+    "timestamp": "2024-01-01T00:00:00",
+    "cached_at": "2025-06-24T06:33:58.799082"
+  },
+  "0625743e091b22079059700474394243260133adfb5cce4942b549cdc2cafe9c": {
+    "score": 0.8,
+    "comment": "Exception handled appropriately",
+    "passed": true,
+    "model_used": "gpt-4o-mini",
+    "timestamp": "2024-01-01T00:00:00",
+    "cached_at": "2025-06-24T06:33:58.801199"
+  },
+  "704505bbb1240861fb0706be8f28b84995dcefd7c0a123251f671e53911d0d9b": {
+    "score": 0.8,
+    "comment": "Good output",
+    "passed": true,
+    "model_used": "gpt-4o-mini",
+    "timestamp": "2024-01-01T00:00:00",
+    "cached_at": "2025-06-24T06:33:58.805691"
+  },
+  "5dd2266f6a054d05d35987437094905daaac0ba3550184f0d38c3801949c727f": {
+    "score": 0.9,
+    "comment": "Professional output",
+    "passed": true,
+    "model_used": "gpt-4o-mini",
+    "timestamp": "2024-01-01T00:00:00",
+    "cached_at": "2025-06-24T06:35:06.551532"
+  },
+  "92333fca98832f3f1f8dde9a7da4983fef8f41637bad1e571dcbcdeec76e9683": {
+    "score": 0.3,
+    "comment": "Poor quality",
+    "passed": false,
+    "model_used": "gpt-4o-mini",
+    "timestamp": "2024-01-01T00:00:00",
+    "cached_at": "2025-06-24T06:35:06.554760"
+  },
+  "72bfc1d3ee3fc7736d3d4b35006d436b17817c2672c74425d83e7defc4956c02": {
+    "score": 0.8,
+    "comment": "Good test behavior",
+    "passed": true,
+    "model_used": "gpt-4o-mini",
+    "timestamp": "2024-01-01T00:00:00",
+    "cached_at": "2025-06-24T06:33:58.815028"
+  }
+}

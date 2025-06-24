@@ -29,7 +29,7 @@ from numerous.pytest_llm_validate import llm_eval
 def test_greeting():
     def greet(name):
         return f"Hello, {name}!"
-    
+
     return greet("World")
 ```
 
@@ -38,11 +38,11 @@ def test_greeting():
 ```python
 def test_multiple_outputs(llm_eval):
     tester = llm_eval("All outputs should be professional and helpful")
-    
+
     result1 = generate_email_response("complaint")
     tester.check(result1, label="complaint_response")
-    
-    result2 = generate_email_response("inquiry") 
+
+    result2 = generate_email_response("inquiry")
     tester.check(result2, label="inquiry_response")
 ```
 
