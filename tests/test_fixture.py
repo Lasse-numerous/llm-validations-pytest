@@ -1,6 +1,7 @@
 """Tests for the fixture-based LLM evaluation functionality."""
 
-from typing import Callable
+from collections.abc import Callable
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
@@ -26,15 +27,17 @@ class TestLLMEvalFixture:
         assert hasattr(tester, "get_summary")
 
     @pytest.fixture(autouse=True)
-    def mock_get_agent(self, mocker: Mock) -> Mock:
+    def mock_get_agent(self, mocker: Any) -> Any:
         """Mock the get_agent function to avoid actual LLM calls."""
-        from numerous.pytest_llm_validate.models import EvalResult, EvalRequest, EvalRule
+        from numerous.pytest_llm_validate.models import (
+            EvalRequest,
+            EvalResult,
+            EvalRule,
+        )
 
         # Create a dummy rule for test results
         test_rule = EvalRule(
-            name="test_rule",
-            description="Test rule for mocking",
-            prompt="Test prompt"
+            name="test_rule", description="Test rule for mocking", prompt="Test prompt"
         )
 
         # Create a dummy request for test results
@@ -43,7 +46,7 @@ class TestLLMEvalFixture:
             artifacts={"output": "test"},
             rule=test_rule,
             threshold=0.7,
-            model="gpt-4o-mini"
+            model="gpt-4o-mini",
         )
 
         mock_agent = mocker.patch("numerous.pytest_llm_validate.fixture.get_agent")
@@ -55,7 +58,7 @@ class TestLLMEvalFixture:
             passed=True,
             request=test_request,
             model_used="gpt-4o-mini",
-            timestamp="2024-01-01T00:00:00"
+            timestamp="2024-01-01T00:00:00",
         )
         return mock_agent
 
@@ -64,13 +67,17 @@ class TestLLMEvalFixture:
     ) -> None:
         """Test that tester.check() method works correctly."""
         # Configure mock to return a passing result
-        from numerous.pytest_llm_validate.models import EvalResult, EvalRequest, EvalRule
+        from numerous.pytest_llm_validate.models import (
+            EvalRequest,
+            EvalResult,
+            EvalRule,
+        )
 
         test_rule = EvalRule(name="test_rule", description="Test", prompt="Test")
         test_request = EvalRequest(
             specification="Test specification",
             artifacts={"output": "test"},
-            rule=test_rule
+            rule=test_rule,
         )
 
         mock_agent = mock_get_agent.return_value
@@ -80,7 +87,7 @@ class TestLLMEvalFixture:
             passed=True,
             request=test_request,
             model_used="gpt-4o-mini",
-            timestamp="2024-01-01T00:00:00"
+            timestamp="2024-01-01T00:00:00",
         )
 
         tester = llm_eval("Test specification", no_dedupe=True)
@@ -102,13 +109,17 @@ class TestLLMEvalFixture:
     ) -> None:
         """Test that multiple checks can be performed with the same tester."""
         # Configure mock to return passing results
-        from numerous.pytest_llm_validate.models import EvalResult, EvalRequest, EvalRule
+        from numerous.pytest_llm_validate.models import (
+            EvalRequest,
+            EvalResult,
+            EvalRule,
+        )
 
         test_rule = EvalRule(name="test_rule", description="Test", prompt="Test")
         test_request = EvalRequest(
             specification="All outputs should be professional",
             artifacts={"output": "test"},
-            rule=test_rule
+            rule=test_rule,
         )
 
         mock_agent = mock_get_agent.return_value
@@ -118,7 +129,7 @@ class TestLLMEvalFixture:
             passed=True,
             request=test_request,
             model_used="gpt-4o-mini",
-            timestamp="2024-01-01T00:00:00"
+            timestamp="2024-01-01T00:00:00",
         )
 
         tester = llm_eval("All outputs should be professional")
@@ -149,13 +160,17 @@ class TestLLMEvalFixture:
     ) -> None:
         """Test that tester.check() raises AssertionError on failure."""
         # Configure mock to return a failing result
-        from numerous.pytest_llm_validate.models import EvalResult, EvalRequest, EvalRule
+        from numerous.pytest_llm_validate.models import (
+            EvalRequest,
+            EvalResult,
+            EvalRule,
+        )
 
         test_rule = EvalRule(name="test_rule", description="Test", prompt="Test")
         test_request = EvalRequest(
             specification="Should be high quality",
             artifacts={"output": "bad output"},
-            rule=test_rule
+            rule=test_rule,
         )
 
         mock_agent = mock_get_agent.return_value
@@ -165,7 +180,7 @@ class TestLLMEvalFixture:
             passed=False,
             request=test_request,
             model_used="gpt-4o-mini",
-            timestamp="2024-01-01T00:00:00"
+            timestamp="2024-01-01T00:00:00",
         )
 
         tester = llm_eval("Should be high quality")
@@ -198,13 +213,19 @@ class TestLLMEvalFixture:
     ) -> None:
         """Test tester with custom evaluation rule."""
         # Configure mock to return a passing result
-        from numerous.pytest_llm_validate.models import EvalResult, EvalRequest, EvalRule
+        from numerous.pytest_llm_validate.models import (
+            EvalRequest,
+            EvalResult,
+            EvalRule,
+        )
 
-        test_rule = EvalRule(name="test_behavior", description="Test behavior", prompt="Test")
+        test_rule = EvalRule(
+            name="test_behavior", description="Test behavior", prompt="Test"
+        )
         test_request = EvalRequest(
             specification="Test with custom rule",
             artifacts={"output": "test output"},
-            rule=test_rule
+            rule=test_rule,
         )
 
         mock_agent = mock_get_agent.return_value
@@ -214,7 +235,7 @@ class TestLLMEvalFixture:
             passed=True,
             request=test_request,
             model_used="gpt-4o-mini",
-            timestamp="2024-01-01T00:00:00"
+            timestamp="2024-01-01T00:00:00",
         )
 
         tester = llm_eval("Test with custom rule", rule="test_behavior", no_dedupe=True)

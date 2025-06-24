@@ -45,7 +45,7 @@ repos:
         pass_filenames: false
 
       - id: ci-simulation
-        name: ci-simulation
+        name: ci-simulation (full test suite with coverage)
         entry: ./scripts/precommit-ci.sh
         language: system
         args: [all]

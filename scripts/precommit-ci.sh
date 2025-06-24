@@ -97,6 +97,35 @@ run_quick_tests() {
     fi
 }
 
+run_full_tests() {
+    log_info "Running full test suite with coverage (CI simulation)..."
+
+    if command -v pytest >/dev/null 2>&1; then
+        local pytest_version=$(pytest --version 2>/dev/null | head -1 || echo "unknown")
+        log_info "Running full pytest with CI configuration... (${pytest_version})"
+
+        # Show test files being discovered
+        local test_files=$(find tests/ -name "test_*.py" 2>/dev/null | wc -l || echo "0")
+        echo "  → Discovered ${test_files} test files"
+        echo "  → Using full CI configuration from pyproject.toml"
+        echo "  → Including coverage measurement and plugin loading"
+
+        # Run tests with full CI configuration (uses pyproject.toml settings)
+        if pytest --tb=short -q 2>&1; then
+            log_success "✓ Full CI tests passed"
+        else
+            log_error "✗ Full CI tests failed"
+            echo ""
+            log_error "This failure would cause CI to fail on GitHub Actions!"
+            log_info "Check the detailed output above for specific issues"
+            log_info "Common issues: plugin conflicts, coverage threshold, import errors"
+            return 1
+        fi
+    else
+        log_warning "Pytest not found, skipping tests"
+    fi
+}
+
 validate_commit_messages() {
     log_info "Validating recent commit messages..."
 
@@ -241,7 +270,7 @@ main() {
         "all")
             run_lint_checks
             echo ""
-            run_quick_tests
+            run_full_tests
             echo ""
             validate_commit_messages
             print_validation_summary "comprehensive"
@@ -250,15 +279,22 @@ main() {
             validate_commit_messages
             print_validation_summary "commit-validation"
             ;;
+        "full-test")
+            run_full_tests
+            echo ""
+            validate_commit_messages
+            print_validation_summary "full-test"
+            ;;
         *)
             log_error "Unknown command: $1"
-            echo "Usage: $0 {lint|test|all|commit-check}"
+            echo "Usage: $0 {lint|test|all|commit-check|full-test}"
             echo ""
             echo "Commands:"
             echo "  lint        - Run linting checks + commit validation"
             echo "  test        - Run tests + commit validation"
             echo "  all         - Run comprehensive checks + commit validation"
             echo "  commit-check - Run only commit message validation"
+            echo "  full-test   - Run full test suite with coverage (CI simulation)"
             exit 1
             ;;
     esac
