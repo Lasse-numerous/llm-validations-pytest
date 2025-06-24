@@ -16,6 +16,7 @@ repos:
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
+        args: [--force-scope, --scopes=docs,api,core]
 
   - repo: https://github.com/PyCQA/bandit
     rev: 1.8.5
