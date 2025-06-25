@@ -1,5 +1,10 @@
 # pytest-LLM-Validate
 
+[![CI](https://github.com/Lasse-numerous/llm-validations-pytest/workflows/CI/badge.svg)](https://github.com/Lasse-numerous/llm-validations-pytest/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/Lasse-numerous/llm-validations-pytest/branch/main/graph/badge.svg)](https://codecov.io/gh/Lasse-numerous/llm-validations-pytest)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A pytest plugin and toolkit that lets developers embed **AI-driven qualitative & behavioural tests** into their codebase with minimal boilerplate.
 
 ## Overview
