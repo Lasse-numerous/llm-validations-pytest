@@ -1,0 +1,83 @@
+site_name: pytest-LLM-Validate
+site_description: A pytest plugin for AI-driven qualitative testing using Large Language Models
+site_url: https://numerous-com.github.io/pytest-llm-validate/
+repo_url: https://github.com/numerous-com/pytest-llm-validate
+repo_name: numerous-com/pytest-llm-validate
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.annotate
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - User Guide: user-guide.md
+    - Examples & Tutorials: examples.md
+    - Configuration Guide: configuration.md
+  - Technical Reference:
+    - API Reference: api-reference.md
+    - Architecture: architecture.md
+  - Project Info:
+    - Product Requirements: product-requirements.md
+    - Developer Workflow: developer-workflow.md
+    - CI Debugging: ci-debugging.md
+    - Technical Resume: resume.md
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - footnotes
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/numerous-com/pytest-llm-validate
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/pytest-llm-validate/
+  version:
+    provider: mike
+
+docs_dir: docs
+site_dir: site

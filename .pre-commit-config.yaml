@@ -1,0 +1,67 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.6.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [--force-scope, --scopes=docs,api,core,ci,test,config]
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.5
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.12.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.16.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests, pydantic, pytest]
+
+  - repo: local
+    hooks:
+      - id: pytest-quick
+        name: pytest (quick - no coverage)
+        entry: pytest
+        language: system
+        args: [--tb=short, -q, --no-cov, --override-ini=addopts=, tests/]
+        types: [python]
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: pytest-full
+        name: pytest (full CI mirror with coverage)
+        entry: pytest
+        language: system
+        args: [--cov=numerous.pytest_llm_validate, --cov-report=xml, --cov-report=term-missing]
+        types: [python]
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: mkdocs-build
+        name: mkdocs-build
+        entry: mkdocs
+        language: system
+        args: [build, --strict]
+        files: ^(docs/.*|mkdocs\.yml)$
+        pass_filenames: false

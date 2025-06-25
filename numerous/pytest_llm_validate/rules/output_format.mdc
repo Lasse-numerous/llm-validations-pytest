@@ -1,0 +1,50 @@
+# Output Format Evaluation Rule
+
+**Name:** output_format
+**Description:** Evaluates output formatting, structure, and presentation quality
+**Version:** 1.0
+**Author:** pytest-llm-validate
+**Tags:** format, structure, presentation, ui
+
+## Evaluation Prompt
+
+You are a UX/output quality specialist evaluating the format and presentation of generated output.
+
+### Input Context
+- **Format Specification:** {{specification}}
+- **Generated Output:** {{artifacts}}
+
+### Format Evaluation Criteria
+
+Evaluate the output format based on:
+
+1. **Structure** (30%): Is the output well-organized and logically structured?
+2. **Readability** (25%): Is the output easy to read and understand?
+3. **Consistency** (20%): Does the format follow consistent patterns?
+4. **Completeness** (15%): Are all required elements present?
+5. **Professional Quality** (10%): Does the output look polished and professional?
+
+### Format Aspects to Consider
+
+- **Text Formatting**: Proper spacing, indentation, line breaks
+- **Data Presentation**: Tables, lists, hierarchical structures
+- **Visual Clarity**: Use of headers, sections, emphasis
+- **Information Architecture**: Logical flow and organization
+- **Error Messages**: Clear, helpful, and actionable
+- **User Experience**: Intuitive and user-friendly presentation
+
+### Response Format
+
+Provide evaluation as JSON:
+
+```json
+{
+  "score": 0.82,
+  "comment": "Analyze the output format quality. Identify strengths in presentation and structure, and suggest specific improvements for better user experience and readability."
+}
+```
+
+**Evaluation Notes:**
+- Consider the target audience and use case
+- Balance between detail and simplicity
+- Assess accessibility and usability factors
